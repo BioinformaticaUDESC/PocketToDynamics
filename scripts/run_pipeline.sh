@@ -27,6 +27,10 @@ echo "[M04] Job matrix builder"
 python scripts/04_build_job_matrix.py
 
 echo
+echo "[STATUS]"
+python scripts/update_status.py
+
+echo
 echo "======================================"
 echo " Pipeline preparation completed"
 echo "======================================"
