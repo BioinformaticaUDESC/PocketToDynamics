@@ -2,6 +2,7 @@
 
 from pathlib import Path
 from datetime import datetime
+from math import sqrt
 import csv
 import json
 import shutil
@@ -9,64 +10,30 @@ import subprocess
 import sys
 
 ROOT = Path.home() / "PocketToDynamics"
+
 RECEPTOR_DIR = ROOT / "work/normalized/receptors"
 OUT_ROOT = ROOT / "work/pockets"
 LOG_DIR = ROOT / "logs"
 
-THRESHOLD = 0.10
+SCORE_THRESHOLD = 0.10
+SPATIAL_CUTOFF = 8.0
+MIN_RESIDUES = 3
 
 
 def find_concavity():
     return shutil.which("concavity")
 
 
-def parse_scores(score_file, threshold):
-    selected = []
-
-    with score_file.open(errors="replace") as handle:
-        for line in handle:
-            line = line.strip()
-
-            if not line or line.startswith("#"):
-                continue
-
-            fields = line.split()
-
-            if len(fields) < 3:
-                continue
-
-            try:
-                residue_id = int(fields[0])
-                score = float(fields[2])
-            except ValueError:
-                continue
-
-            if score > threshold:
-                selected.append((residue_id, score))
-
-    if not selected:
-        return []
-
-    pockets = []
-    current = [selected[0]]
-
-    for residue in selected[1:]:
-        previous_residue = current[-1][0]
-        current_residue = residue[0]
-
-        if current_residue == previous_residue + 1:
-            current.append(residue)
-        else:
-            pockets.append(current)
-            current = [residue]
-
-    pockets.append(current)
-
-    return pockets
+def distance(a, b):
+    return sqrt(
+        (a[0] - b[0]) ** 2 +
+        (a[1] - b[1]) ** 2 +
+        (a[2] - b[2]) ** 2
+    )
 
 
-def pdb_ca_coordinates(pdb_file):
-    coords = {}
+def parse_pdb_ca(pdb_file):
+    residues = {}
 
     with pdb_file.open(errors="replace") as handle:
         for line in handle:
@@ -74,141 +41,447 @@ def pdb_ca_coordinates(pdb_file):
             if not line.startswith("ATOM"):
                 continue
 
-            atom_name = line[12:16].strip()
-
-            if atom_name != "CA":
+            if line[12:16].strip() != "CA":
                 continue
+
+            chain = line[21].strip() or "_"
 
             try:
-                residue_number = int(line[22:26].strip())
-                x = float(line[30:38].strip())
-                y = float(line[38:46].strip())
-                z = float(line[46:54].strip())
-            except (ValueError, IndexError):
+                resnum = int(
+                    line[22:26].strip()
+                )
+
+                x = float(
+                    line[30:38].strip()
+                )
+
+                y = float(
+                    line[38:46].strip()
+                )
+
+                z = float(
+                    line[46:54].strip()
+                )
+
+            except ValueError:
                 continue
 
-            coords[residue_number] = (x, y, z)
+            residues[
+                (chain, resnum)
+            ] = (x, y, z)
 
-    return coords
+    return residues
 
 
-def centroid(residue_ids, coordinate_map):
-    xyz = [
-        coordinate_map[r]
-        for r in residue_ids
-        if r in coordinate_map
+def chain_from_score_filename(path, target_id):
+    name = path.name
+
+    prefix = f"{target_id}_"
+    suffix = "_concavity.scores"
+
+    if (
+        name.startswith(prefix)
+        and name.endswith(suffix)
+    ):
+        chain = name[
+            len(prefix):
+            -len(suffix)
+        ]
+
+        return chain or "_"
+
+    return None
+
+
+def parse_concavity_scores(
+    score_files,
+    target_id,
+    coordinates,
+):
+    candidates = []
+
+    for score_file in score_files:
+
+        chain = chain_from_score_filename(
+            score_file,
+            target_id,
+        )
+
+        if chain is None:
+            continue
+
+        with score_file.open(
+            errors="replace"
+        ) as handle:
+
+            for line in handle:
+
+                line = line.strip()
+
+                if (
+                    not line
+                    or line.startswith("#")
+                ):
+                    continue
+
+                fields = line.split()
+
+                if len(fields) < 3:
+                    continue
+
+                try:
+                    resnum = int(fields[0])
+                    score = float(fields[2])
+                except ValueError:
+                    continue
+
+                key = (
+                    chain,
+                    resnum,
+                )
+
+                if (
+                    score >= SCORE_THRESHOLD
+                    and key in coordinates
+                ):
+                    candidates.append({
+                        "chain":
+                            chain,
+
+                        "resnum":
+                            resnum,
+
+                        "score":
+                            score,
+
+                        "coord":
+                            coordinates[key],
+                    })
+
+    return candidates
+
+
+def spatial_components(candidates):
+    """
+    Connected-component clustering in Cartesian space.
+
+    Residues are connected when their C-alpha
+    atoms are within SPATIAL_CUTOFF Angstrom.
+    """
+
+    n = len(candidates)
+
+    adjacency = [
+        []
+        for _ in range(n)
     ]
 
-    if not xyz:
-        return None
+    for i in range(n):
+
+        for j in range(i + 1, n):
+
+            if distance(
+                candidates[i]["coord"],
+                candidates[j]["coord"],
+            ) <= SPATIAL_CUTOFF:
+
+                adjacency[i].append(j)
+                adjacency[j].append(i)
+
+    visited = set()
+    components = []
+
+    for start in range(n):
+
+        if start in visited:
+            continue
+
+        stack = [start]
+        visited.add(start)
+
+        component = []
+
+        while stack:
+
+            node = stack.pop()
+
+            component.append(
+                candidates[node]
+            )
+
+            for neighbour in adjacency[node]:
+
+                if neighbour not in visited:
+
+                    visited.add(
+                        neighbour
+                    )
+
+                    stack.append(
+                        neighbour
+                    )
+
+        components.append(
+            component
+        )
+
+    return components
+
+
+def centroid(component):
+    xyz = [
+        r["coord"]
+        for r in component
+    ]
 
     n = len(xyz)
 
     return (
-        sum(p[0] for p in xyz) / n,
-        sum(p[1] for p in xyz) / n,
-        sum(p[2] for p in xyz) / n,
+        sum(x[0] for x in xyz) / n,
+        sum(x[1] for x in xyz) / n,
+        sum(x[2] for x in xyz) / n,
     )
 
 
-def process_receptor(receptor, concavity_bin):
+def process_receptor(
+    receptor,
+    concavity_bin,
+):
     target_id = receptor.stem
-    target_dir = OUT_ROOT / target_id
-    target_dir.mkdir(parents=True, exist_ok=True)
 
-    output_prefix = target_dir / "concavity"
+    target_dir = (
+        OUT_ROOT /
+        target_id
+    )
+
+    target_dir.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
+    #
+    # Remove only generated Concavity/runtime files.
+    #
+    for old in target_dir.iterdir():
+
+        if old.is_file():
+            old.unlink()
 
     cmd = [
         concavity_bin,
-        str(receptor),
-        str(output_prefix),
+        str(receptor.resolve()),
+        "concavity",
     ]
 
     result = subprocess.run(
         cmd,
+        cwd=target_dir,
         capture_output=True,
         text=True,
     )
 
-    (target_dir / "concavity_stdout.txt").write_text(
+    (
+        target_dir /
+        "concavity_stdout.txt"
+    ).write_text(
         result.stdout or ""
     )
 
-    (target_dir / "concavity_stderr.txt").write_text(
+    (
+        target_dir /
+        "concavity_stderr.txt"
+    ).write_text(
         result.stderr or ""
     )
 
     if result.returncode != 0:
+
         return {
-            "target_id": target_id,
-            "status": "FAIL_CONCAVITY",
-            "pockets": [],
+            "target_id":
+                target_id,
+
+            "status":
+                "FAIL_CONCAVITY",
+
+            "pockets":
+                [],
         }
 
-    score_candidates = sorted(
-        target_dir.glob("concavity*.scores")
+    score_files = sorted(
+        target_dir.glob(
+            "*_concavity.scores"
+        )
     )
 
-    if not score_candidates:
+    if not score_files:
+
         return {
-            "target_id": target_id,
-            "status": "FAIL_NO_SCORE_FILE",
-            "pockets": [],
+            "target_id":
+                target_id,
+
+            "status":
+                "FAIL_NO_SCORE_FILES",
+
+            "pockets":
+                [],
         }
 
-    score_file = score_candidates[0]
-
-    groups = parse_scores(
-        score_file,
-        THRESHOLD,
+    coordinates = parse_pdb_ca(
+        receptor
     )
 
-    coordinate_map = pdb_ca_coordinates(receptor)
+    candidates = (
+        parse_concavity_scores(
+            score_files,
+            target_id,
+            coordinates,
+        )
+    )
+
+    if not candidates:
+
+        return {
+            "target_id":
+                target_id,
+
+            "status":
+                "WARN_NO_CANDIDATE_RESIDUES",
+
+            "pockets":
+                [],
+        }
+
+    components = spatial_components(
+        candidates
+    )
+
+    #
+    # Remove isolated / very small components.
+    #
+    components = [
+        c
+        for c in components
+        if len(c) >= MIN_RESIDUES
+    ]
+
+    #
+    # Strongest / largest pockets first.
+    #
+    components.sort(
+        key=lambda c: (
+            -sum(
+                r["score"]
+                for r in c
+            ),
+            -len(c),
+        )
+    )
 
     pocket_records = []
 
-    for idx, group in enumerate(groups, start=1):
-        residue_ids = [x[0] for x in group]
-        scores = [x[1] for x in group]
+    for index, component in enumerate(
+        components,
+        start=1,
+    ):
 
         c = centroid(
-            residue_ids,
-            coordinate_map,
+            component
         )
 
-        pocket_records.append({
-            "target_id": target_id,
-            "pocket_id": f"P{idx:04d}",
-            "n_residues": len(residue_ids),
-            "first_residue": min(residue_ids),
-            "last_residue": max(residue_ids),
-            "mean_score": sum(scores) / len(scores),
-            "max_score": max(scores),
-            "center_x": None if c is None else round(c[0], 3),
-            "center_y": None if c is None else round(c[1], 3),
-            "center_z": None if c is None else round(c[2], 3),
-            "residue_ids": ",".join(
-                map(str, residue_ids)
-            ),
+        scores = [
+            r["score"]
+            for r in component
+        ]
+
+        chains = sorted({
+            r["chain"]
+            for r in component
         })
 
-    output_tsv = target_dir / "pockets.tsv"
+        residues = sorted(
+            component,
+            key=lambda r: (
+                r["chain"],
+                r["resnum"],
+            ),
+        )
+
+        residue_labels = [
+            f"{r['chain']}:{r['resnum']}"
+            for r in residues
+        ]
+
+        pocket_records.append({
+            "target_id":
+                target_id,
+
+            "pocket_id":
+                f"P{index:04d}",
+
+            "n_residues":
+                len(component),
+
+            "chains":
+                ",".join(chains),
+
+            "mean_score":
+                round(
+                    sum(scores) /
+                    len(scores),
+                    6,
+                ),
+
+            "max_score":
+                round(
+                    max(scores),
+                    6,
+                ),
+
+            "sum_score":
+                round(
+                    sum(scores),
+                    6,
+                ),
+
+            "center_x":
+                round(c[0], 3),
+
+            "center_y":
+                round(c[1], 3),
+
+            "center_z":
+                round(c[2], 3),
+
+            "residues":
+                ",".join(
+                    residue_labels
+                ),
+        })
+
+    output_tsv = (
+        target_dir /
+        "pockets.tsv"
+    )
 
     fields = [
         "target_id",
         "pocket_id",
         "n_residues",
-        "first_residue",
-        "last_residue",
+        "chains",
         "mean_score",
         "max_score",
+        "sum_score",
         "center_x",
         "center_y",
         "center_z",
-        "residue_ids",
+        "residues",
     ]
 
-    with output_tsv.open("w", newline="") as handle:
+    with output_tsv.open(
+        "w",
+        newline="",
+    ) as handle:
+
         writer = csv.DictWriter(
             handle,
             fieldnames=fields,
@@ -216,24 +489,68 @@ def process_receptor(receptor, concavity_bin):
         )
 
         writer.writeheader()
-        writer.writerows(pocket_records)
+
+        writer.writerows(
+            pocket_records
+        )
+
+    if pocket_records:
+        status = "PASS"
+    else:
+        status = "WARN_NO_SPATIAL_POCKETS"
 
     summary = {
-        "target_id": target_id,
-        "status": "PASS",
-        "threshold": THRESHOLD,
-        "n_pockets": len(pocket_records),
-        "score_file": str(
-            score_file.relative_to(ROOT)
-        ),
-        "output": str(
-            output_tsv.relative_to(ROOT)
-        ),
+        "target_id":
+            target_id,
+
+        "status":
+            status,
+
+        "score_threshold":
+            SCORE_THRESHOLD,
+
+        "spatial_cutoff_angstrom":
+            SPATIAL_CUTOFF,
+
+        "minimum_residues":
+            MIN_RESIDUES,
+
+        "score_files": [
+            str(
+                f.relative_to(ROOT)
+            )
+            for f in score_files
+        ],
+
+        "n_score_files":
+            len(score_files),
+
+        "n_candidate_residues":
+            len(candidates),
+
+        "n_spatial_components_raw":
+            len(
+                spatial_components(
+                    candidates
+                )
+            ),
+
+        "n_pockets":
+            len(pocket_records),
+
+        "pocket_table":
+            str(
+                output_tsv.relative_to(
+                    ROOT
+                )
+            ),
     }
 
     with (
-        target_dir / "pocket_summary.json"
+        target_dir /
+        "pocket_summary.json"
     ).open("w") as handle:
+
         json.dump(
             summary,
             handle,
@@ -241,40 +558,57 @@ def process_receptor(receptor, concavity_bin):
         )
 
     return {
-        "target_id": target_id,
-        "status": "PASS",
-        "pockets": pocket_records,
+        "target_id":
+            target_id,
+
+        "status":
+            status,
+
+        "pockets":
+            pocket_records,
     }
 
 
 def main():
+
     OUT_ROOT.mkdir(
         parents=True,
         exist_ok=True,
     )
 
-    concavity_bin = find_concavity()
+    concavity_bin = (
+        find_concavity()
+    )
 
     if concavity_bin is None:
-        print("FAIL_M03_CONCAVITY_NOT_FOUND")
+
+        print(
+            "FAIL_M03_CONCAVITY_NOT_FOUND"
+        )
+
         sys.exit(2)
 
     receptors = sorted(
-        RECEPTOR_DIR.glob("*.pdb")
+        RECEPTOR_DIR.glob(
+            "*.pdb"
+        )
     )
 
     if not receptors:
-        log = LOG_DIR / "M03_pocket_mapping.log"
+
+        log = (
+            LOG_DIR /
+            "M03_pocket_mapping.log"
+        )
 
         log.write_text(
             "SKIP_M03_NO_RECEPTORS\n"
-            f"Directory: {RECEPTOR_DIR}\n"
+            f"Directory: "
+            f"{RECEPTOR_DIR}\n"
         )
 
-        print("SKIP_M03_NO_RECEPTORS")
         print(
-            "No normalized PDB receptors found in:",
-            RECEPTOR_DIR,
+            "SKIP_M03_NO_RECEPTORS"
         )
 
         return
@@ -282,8 +616,10 @@ def main():
     results = []
 
     for receptor in receptors:
+
         print(
-            f"[M03] Processing {receptor.name}"
+            f"[M03] Processing "
+            f"{receptor.name}"
         )
 
         result = process_receptor(
@@ -291,11 +627,15 @@ def main():
             concavity_bin,
         )
 
-        results.append(result)
+        results.append(
+            result
+        )
 
         print(
-            f"      status={result['status']} "
-            f"pockets={len(result['pockets'])}"
+            f"      status="
+            f"{result['status']} "
+            f"pockets="
+            f"{len(result['pockets'])}"
         )
 
     pass_count = sum(
@@ -303,24 +643,64 @@ def main():
         for r in results
     )
 
-    fail_count = (
-        len(results) - pass_count
+    warn_count = sum(
+        r["status"].startswith(
+            "WARN"
+        )
+        for r in results
     )
 
-    global_summary = {
-        "module": "M03_POCKET_MAPPING",
-        "timestamp": datetime.now().isoformat(),
-        "threshold": THRESHOLD,
-        "targets_total": len(results),
-        "targets_pass": pass_count,
-        "targets_failed": fail_count,
+    fail_count = sum(
+        r["status"].startswith(
+            "FAIL"
+        )
+        for r in results
+    )
+
+    summary = {
+        "module":
+            "M03_POCKET_MAPPING",
+
+        "timestamp":
+            datetime.now().isoformat(),
+
+        "method":
+            "Concavity score threshold + "
+            "C-alpha spatial clustering",
+
+        "score_threshold":
+            SCORE_THRESHOLD,
+
+        "spatial_cutoff_angstrom":
+            SPATIAL_CUTOFF,
+
+        "minimum_residues":
+            MIN_RESIDUES,
+
+        "targets_total":
+            len(results),
+
+        "targets_pass":
+            pass_count,
+
+        "targets_warn":
+            warn_count,
+
+        "targets_failed":
+            fail_count,
+
         "targets": [
             {
-                "target_id": r["target_id"],
-                "status": r["status"],
-                "n_pockets": len(
-                    r["pockets"]
-                ),
+                "target_id":
+                    r["target_id"],
+
+                "status":
+                    r["status"],
+
+                "n_pockets":
+                    len(
+                        r["pockets"]
+                    ),
             }
             for r in results
         ],
@@ -331,11 +711,29 @@ def main():
         "pocket_mapping_summary.json"
     )
 
-    with summary_path.open("w") as handle:
+    with summary_path.open(
+        "w"
+    ) as handle:
+
         json.dump(
-            global_summary,
+            summary,
             handle,
             indent=2,
+        )
+
+    if fail_count:
+        module_status = (
+            "WARN_M03_PARTIAL_FAILURE"
+        )
+
+    elif warn_count:
+        module_status = (
+            "WARN_M03_POCKET_WARNINGS"
+        )
+
+    else:
+        module_status = (
+            "PASS_M03_POCKET_MAPPING"
         )
 
     log_path = (
@@ -343,32 +741,61 @@ def main():
         "M03_pocket_mapping.log"
     )
 
-    with log_path.open("w") as handle:
-        if fail_count == 0:
-            handle.write(
-                "PASS_M03_POCKET_MAPPING\n"
-            )
-        else:
-            handle.write(
-                "WARN_M03_PARTIAL_FAILURE\n"
-            )
+    with log_path.open(
+        "w"
+    ) as handle:
 
         handle.write(
-            f"Targets total: {len(results)}\n"
+            module_status +
+            "\n"
         )
+
         handle.write(
-            f"Targets PASS: {pass_count}\n"
+            f"Targets total: "
+            f"{len(results)}\n"
         )
+
         handle.write(
-            f"Targets failed: {fail_count}\n"
+            f"Targets PASS: "
+            f"{pass_count}\n"
+        )
+
+        handle.write(
+            f"Targets WARN: "
+            f"{warn_count}\n"
+        )
+
+        handle.write(
+            f"Targets failed: "
+            f"{fail_count}\n"
         )
 
     print()
-    print("===== M03 SUMMARY =====")
-    print(f"Targets: {len(results)}")
-    print(f"PASS: {pass_count}")
-    print(f"Failed: {fail_count}")
-    print(f"Summary: {summary_path}")
+    print(
+        "===== M03 SUMMARY ====="
+    )
+
+    print(
+        f"Targets: "
+        f"{len(results)}"
+    )
+
+    print(
+        f"PASS: {pass_count}"
+    )
+
+    print(
+        f"WARN: {warn_count}"
+    )
+
+    print(
+        f"Failed: {fail_count}"
+    )
+
+    print(
+        f"Summary: "
+        f"{summary_path}"
+    )
 
 
 if __name__ == "__main__":
