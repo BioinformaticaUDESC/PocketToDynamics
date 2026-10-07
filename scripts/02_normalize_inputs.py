@@ -177,23 +177,21 @@ def main():
 
     log_path = LOG_DIR / "M02_normalization.log"
 
+    if not receptor_records and not ligand_records:
+        status = "SKIP_M02_NO_INPUTS"
+    elif not receptor_records:
+        status = "WARN_M02_NO_RECEPTORS"
+    elif not ligand_records:
+        status = "WARN_M02_NO_LIGANDS"
+    else:
+        status = "PASS_M02_INPUT_NORMALIZATION"
+
     with log_path.open("w") as f:
+        f.write(status + "\n")
+        f.write(f"Receptors: {len(receptor_records)}\n")
+        f.write(f"Ligands: {len(ligand_records)}\n")
 
-        if not receptor_records:
-            f.write("WARN_NO_RECEPTORS\n")
-
-        if not ligand_records:
-            f.write("WARN_NO_LIGANDS\n")
-
-        f.write("PASS_M02_INPUT_NORMALIZATION\n")
-        f.write(
-            f"Receptors: {len(receptor_records)}\n"
-        )
-        f.write(
-            f"Ligands: {len(ligand_records)}\n"
-        )
-
-    print("PASS_M02_INPUT_NORMALIZATION")
+    print(status)
     print(f"Receptors detected: {len(receptor_records)}")
     print(f"Ligands detected: {len(ligand_records)}")
     print(f"Output: {OUT_ROOT}")
