@@ -1,0 +1,34 @@
+screening:
+  default_engine: vina
+
+engines:
+  vina:
+    executable: "/usr/bin/vina"
+    expected_version: "1.2.5"
+
+  gnina:
+    executable: "/home/juan/bin/gnina"
+    expected_version: "1.0"
+
+preparation:
+  preferred_backend: meeko
+  fallback_backend: openbabel
+
+  openbabel:
+    executable: "/usr/bin/obabel"
+
+box:
+  size_x: 20.0
+  size_y: 20.0
+  size_z: 20.0
+
+vina:
+  exhaustiveness: 8
+  num_modes: 9
+  energy_range: 4
+  seed: 20261007
+
+execution:
+  resume: true
+  overwrite: false
+  max_attempts: 2

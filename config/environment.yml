@@ -1,0 +1,9 @@
+name: pocket2dynamics
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.11
+  - pip
+prefix: /home/juan/miniconda3/envs/pocket2dynamics
