@@ -1,12 +1,15 @@
 name: pocket2dynamics
+
 channels:
-  - bioconda
   - conda-forge
+  - bioconda
   - defaults
+
 dependencies:
   - python=3.11
   - pip
   - rdkit
   - scipy
   - gemmi
-prefix: /home/juan/miniconda3/envs/pocket2dynamics
+  - pip:
+      - meeko==0.8.0
