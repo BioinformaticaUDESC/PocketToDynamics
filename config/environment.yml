@@ -6,4 +6,7 @@ channels:
 dependencies:
   - python=3.11
   - pip
+  - rdkit
+  - scipy
+  - gemmi
 prefix: /home/juan/miniconda3/envs/pocket2dynamics
