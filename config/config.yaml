@@ -1,0 +1,36 @@
+project:
+  name: "PocketToDynamics"
+  version: "0.1.0"
+
+paths:
+  root: "~/PocketToDynamics"
+  receptors: "input/receptors"
+  ligands: "input/ligands"
+  metadata: "input/metadata"
+  work: "work"
+  results: "results"
+  logs: "logs"
+  manifest: "manifest"
+
+workflow:
+  overwrite: false
+  resume: true
+  strict_qc: true
+
+modules:
+  M01_init: true
+  M02_normalization: true
+  M03_pocket_mapping: true
+  M04_job_builder: true
+  M05_screening: true
+  M06_parsing: true
+  M07_ranking: true
+  M08_chemoinformatics: true
+  M09_multivariate: true
+  M10_candidate_gate: true
+  M11_dynamics: true
+  M12_trajectory_analysis: true
+  M13_energetics: true
+  M14_landscape: true
+  M15_integration: true
+  M16_reporting: true
