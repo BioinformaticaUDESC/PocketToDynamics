@@ -10,3 +10,11 @@ manifest/*.json
 # Runtime manifests / execution state
 manifest/*
 !manifest/.gitkeep
+
+# Runtime user inputs
+input/*
+!input/.gitkeep
+
+# Runtime computational outputs
+work/
+logs/
