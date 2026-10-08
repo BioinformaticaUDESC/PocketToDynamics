@@ -1,0 +1,308 @@
+{
+  "review_date": "2026-10-08",
+  "reviewed_commit": "3de57df",
+  "scope": "Summary of existing local audit records; not a new full MD execution",
+  "profiles": {
+    "production": {
+      "audit_sha256": "2ce1dd14ffaa951cfc0ac47f29fb877ab84532a79d7ce33364c61a1dfaefb268",
+      "recorded_git_commit": "33db65730a5e14b2c29ef44af0dbbe0dbb096004",
+      "started_utc": "20261008T185923Z",
+      "counts": {
+        "PASS": 12,
+        "SKIP": 13
+      },
+      "modules": [
+        {
+          "module": "M01",
+          "status": "PASS",
+          "returncode": 0
+        },
+        {
+          "module": "M02",
+          "status": "PASS",
+          "returncode": 0
+        },
+        {
+          "module": "M03",
+          "status": "PASS",
+          "returncode": 0
+        },
+        {
+          "module": "M04",
+          "status": "PASS",
+          "returncode": 0
+        },
+        {
+          "module": "M05A",
+          "status": "PASS",
+          "returncode": 0
+        },
+        {
+          "module": "M05B",
+          "status": "PASS",
+          "returncode": 0
+        },
+        {
+          "module": "M05C",
+          "status": "PASS",
+          "returncode": 0
+        },
+        {
+          "module": "M06",
+          "status": "PASS",
+          "returncode": 0
+        },
+        {
+          "module": "M07",
+          "status": "PASS",
+          "returncode": 0
+        },
+        {
+          "module": "M08",
+          "status": "PASS",
+          "returncode": 0
+        },
+        {
+          "module": "M09",
+          "status": "PASS",
+          "returncode": 0
+        },
+        {
+          "module": "M10A",
+          "status": "SKIP",
+          "returncode": 0
+        },
+        {
+          "module": "M10B",
+          "status": "PASS",
+          "returncode": 0
+        },
+        {
+          "module": "M10C",
+          "status": "SKIP",
+          "returncode": 0
+        },
+        {
+          "module": "M11",
+          "status": "SKIP",
+          "returncode": 0
+        },
+        {
+          "module": "M12",
+          "status": "SKIP",
+          "returncode": 0
+        },
+        {
+          "module": "M13",
+          "status": "SKIP",
+          "returncode": 0
+        },
+        {
+          "module": "M14",
+          "status": "SKIP",
+          "returncode": 0
+        },
+        {
+          "module": "M15",
+          "status": "SKIP",
+          "returncode": 0
+        },
+        {
+          "module": "M16",
+          "status": "SKIP",
+          "returncode": 0
+        },
+        {
+          "module": "M17",
+          "status": "SKIP",
+          "returncode": 0
+        },
+        {
+          "module": "M18",
+          "status": "SKIP",
+          "returncode": 0
+        },
+        {
+          "module": "M19",
+          "status": "SKIP",
+          "returncode": 0
+        },
+        {
+          "module": "M20",
+          "status": "SKIP",
+          "returncode": 0
+        },
+        {
+          "module": "M21",
+          "status": "SKIP",
+          "returncode": 0
+        }
+      ]
+    },
+    "fixture": {
+      "audit_sha256": "b479cbb60dbf7c97b7e903b021d174d4448b9039420155d0ee3cef8e8f193181",
+      "recorded_git_commit": "31c052091683358974e5f01af80f2cb9d00f2ac5",
+      "started_utc": "20261008T141438Z",
+      "counts": {
+        "PASS": 24,
+        "SKIP": 1
+      },
+      "modules": [
+        {
+          "module": "M01",
+          "status": "PASS",
+          "returncode": 0
+        },
+        {
+          "module": "M02",
+          "status": "PASS",
+          "returncode": 0
+        },
+        {
+          "module": "M03",
+          "status": "PASS",
+          "returncode": 0
+        },
+        {
+          "module": "M04",
+          "status": "PASS",
+          "returncode": 0,
+          "qc_returncode": 0
+        },
+        {
+          "module": "M05A",
+          "status": "PASS",
+          "returncode": 0
+        },
+        {
+          "module": "M05B",
+          "status": "PASS",
+          "returncode": 0
+        },
+        {
+          "module": "M05C",
+          "status": "PASS",
+          "returncode": 0
+        },
+        {
+          "module": "M06",
+          "status": "PASS",
+          "returncode": 0,
+          "qc_returncode": 0
+        },
+        {
+          "module": "M07",
+          "status": "PASS",
+          "returncode": 0,
+          "qc_returncode": 0
+        },
+        {
+          "module": "M08",
+          "status": "PASS",
+          "returncode": 0,
+          "qc_returncode": 0
+        },
+        {
+          "module": "M09",
+          "status": "PASS",
+          "returncode": 0,
+          "qc_returncode": 0
+        },
+        {
+          "module": "M10A",
+          "status": "SKIP",
+          "returncode": 0,
+          "qc_returncode": 0
+        },
+        {
+          "module": "M10B",
+          "status": "PASS",
+          "returncode": 0
+        },
+        {
+          "module": "M10C",
+          "status": "PASS",
+          "returncode": 0,
+          "qc_returncode": 0
+        },
+        {
+          "module": "M11",
+          "status": "PASS",
+          "returncode": 0,
+          "qc_returncode": 0
+        },
+        {
+          "module": "M12",
+          "status": "PASS",
+          "returncode": 0,
+          "qc_returncode": 0
+        },
+        {
+          "module": "M13",
+          "status": "PASS",
+          "returncode": 0,
+          "qc_returncode": 0
+        },
+        {
+          "module": "M14",
+          "status": "PASS",
+          "returncode": 0,
+          "qc_returncode": 0
+        },
+        {
+          "module": "M15",
+          "status": "PASS",
+          "returncode": 0,
+          "qc_returncode": 0
+        },
+        {
+          "module": "M16",
+          "status": "PASS",
+          "returncode": 0,
+          "qc_returncode": 0
+        },
+        {
+          "module": "M17",
+          "status": "PASS",
+          "returncode": 0,
+          "qc_returncode": 0
+        },
+        {
+          "module": "M18",
+          "status": "PASS",
+          "returncode": 0,
+          "qc_returncode": 0
+        },
+        {
+          "module": "M19",
+          "status": "PASS",
+          "returncode": 0,
+          "qc_returncode": 0
+        },
+        {
+          "module": "M20",
+          "status": "PASS",
+          "returncode": 0,
+          "qc_returncode": 0
+        },
+        {
+          "module": "M21",
+          "status": "PASS",
+          "returncode": 0,
+          "qc_returncode": 0
+        }
+      ]
+    }
+  },
+  "fresh_checks": {
+    "test_core_regressions.py": "PASS",
+    "test_pipeline_failures.py": "PASS",
+    "test_m15_trajectory.py": "PASS",
+    "test_analysis_modules.py 16": "PASS",
+    "test_analysis_modules.py 17": "PASS",
+    "test_analysis_modules.py 18": "PASS",
+    "test_analysis_modules.py 19": "PASS",
+    "test_analysis_modules.py 20": "PASS",
+    "test_analysis_modules.py 21": "PASS"
+  }
+}
