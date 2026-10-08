@@ -6,7 +6,11 @@
 
 **Authors:** Juan Philippe Teixeira¹, Daniel Ferreira de Lima Neto, Miklos Maximiliano Bajay
 
-**Affiliations:** ¹ To be supplied. Affiliations for Daniel Ferreira de Lima Neto and Miklos Maximiliano Bajay remain to be confirmed.
+**Affiliations:**
+
+¹ State University of Santa Catarina – Center for Agricultural and Veterinary Sciences – Graduate Program in Biochemistry and Molecular Biology (PMBqBM)
+
+Affiliations for Daniel Ferreira de Lima Neto and Miklos Maximiliano Bajay remain to be confirmed.
 
 ## Abstract
 
