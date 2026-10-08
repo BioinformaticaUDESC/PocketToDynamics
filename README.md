@@ -80,7 +80,11 @@ checkpoints without provenance are rejected: choose a new output root. The expli
 M14 `--overwrite` option is destructive and should only be used intentionally.
 M15 checks segment hashes and ordered intervals, all frame times/coordinates/boxes,
 full-system atom counts and trajectory coverage. Downstream modules verify artifacts
-before reading them. M15–M21 recompute rather than silently resuming incomplete work.
+before reading them. M15–M21 preserve previous job directories as `.previous-*` and recompute in fresh directories rather than silently resuming incomplete work.
+
+After an audit failure, `bash scripts/run_pipeline.sh --profile fixture --resume-audit M17`
+(for example) retains successful upstream steps, verifies their log/artifact hashes,
+and retries from the specified failed module. Attempt history is retained in the audit manifest.
 
 Negative regression checks:
 

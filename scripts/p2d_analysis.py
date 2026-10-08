@@ -108,7 +108,10 @@ def run_module(module, worker):
         for row in rows:
             job=row['dynamics_job_id']
             if not re.fullmatch(r'[A-Za-z0-9_.-]+',job) or job in {'.','..'} or job in seen: raise ValueError('Invalid/duplicate job id')
-            seen.add(job); jobdir=out/job; jobdir.mkdir(exist_ok=True)
+            seen.add(job); jobdir=out/job
+            if jobdir.exists():
+                jobdir.rename(jobdir.with_name(jobdir.name+'.previous-'+str(__import__('time').time_ns())))
+            jobdir.mkdir(exist_ok=True)
             marker=jobdir/(NAMES[module]+'_manifest.json')
             write_json(marker,{'status':'FAIL','reason':'INCOMPLETE'})
             try:
