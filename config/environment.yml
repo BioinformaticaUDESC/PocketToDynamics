@@ -11,5 +11,6 @@ dependencies:
   - rdkit
   - scipy
   - gemmi
+  - pyyaml
   - pip:
       - meeko==0.8.0

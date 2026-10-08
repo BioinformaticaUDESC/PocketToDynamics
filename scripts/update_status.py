@@ -1,99 +1,78 @@
 #!/usr/bin/env python3
 
 from pathlib import Path
-from datetime import datetime
-import csv
 import re
 
 ROOT = Path.home() / "PocketToDynamics"
 LOG_DIR = ROOT / "logs"
-STATUS_FILE = ROOT / "manifest" / "STATUS.tsv"
+OUT = ROOT / "manifest" / "STATUS.tsv"
 
-MODULE_LOGS = [
-    ("M01", "M01_init.log"),
-    ("M02", "M02_normalization.log"),
-    ("M03", "M03_pocket_mapping.log"),
-    ("M04", "M04_job_builder.log"),
-]
+rows = []
 
-def classify(line):
-    line = line.strip().upper()
+for path in sorted(LOG_DIR.glob("M*.log")):
 
-    if line.startswith("PASS"):
-        return "PASS"
+    text = path.read_text(errors="replace").strip()
 
-    if line.startswith("WARN"):
-        return "WARN"
+    if not text:
+        continue
 
-    if line.startswith("FAIL") or line.startswith("ERROR"):
-        return "FAIL"
+    first = text.splitlines()[0].strip()
 
-    if line.startswith("SKIP"):
-        return "SKIP"
+    m = re.match(r"(M\d+)", path.name)
 
-    return "UNKNOWN"
+    if not m:
+        continue
 
-def main():
-    rows = []
+    module = m.group(1)
 
-    for module, filename in MODULE_LOGS:
-        path = LOG_DIR / filename
+    if first.startswith("PASS_"):
+        status = "PASS"
+    elif first.startswith("WARN_"):
+        status = "WARN"
+    elif first.startswith("FAIL_"):
+        status = "FAIL"
+    elif first.startswith("SKIP_"):
+        status = "SKIP"
+    else:
+        status = "UNKNOWN"
 
-        if not path.exists():
-            rows.append({
-                "module": module,
-                "status": "NOT_RUN",
-                "message": "",
-                "log_file": str(path.relative_to(ROOT)),
-            })
-            continue
-
-        lines = path.read_text(errors="replace").splitlines()
-
-        first = lines[0] if lines else ""
-
-        rows.append({
-            "module": module,
-            "status": classify(first),
-            "message": first,
-            "log_file": str(path.relative_to(ROOT)),
-        })
-
-    with STATUS_FILE.open("w", newline="") as handle:
-        writer = csv.DictWriter(
-            handle,
-            fieldnames=[
-                "module",
-                "status",
-                "message",
-                "log_file",
-            ],
-            delimiter="\t",
+    rows.append(
+        (
+            module,
+            status,
+            first,
+            str(path.relative_to(ROOT)),
         )
+    )
 
-        writer.writeheader()
-        writer.writerows(rows)
+OUT.parent.mkdir(
+    parents=True,
+    exist_ok=True,
+)
 
-    counts = {}
+with OUT.open("w") as f:
+
+    f.write(
+        "module\tstatus\tmessage\tlog_file\n"
+    )
 
     for row in rows:
-        counts[row["status"]] = counts.get(
-            row["status"],
-            0
-        ) + 1
+        f.write("\t".join(row) + "\n")
 
-    print("===== PIPELINE STATUS =====")
+summary = {}
 
-    for row in rows:
-        print(
-            f"{row['module']:4s} "
-            f"{row['status']:8s} "
-            f"{row['message']}"
-        )
+for _, status, _, _ in rows:
+    summary[status] = summary.get(status, 0) + 1
 
-    print()
-    print("Summary:", counts)
-    print(f"Status file: {STATUS_FILE}")
+print("===== PIPELINE STATUS =====")
 
-if __name__ == "__main__":
-    main()
+for module, status, message, _ in rows:
+    print(
+        f"{module:<5} "
+        f"{status:<8} "
+        f"{message}"
+    )
+
+print()
+print("Summary:", summary)
+print("Status file:", OUT)
