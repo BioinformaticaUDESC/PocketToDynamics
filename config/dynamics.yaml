@@ -18,3 +18,18 @@ dynamics:
 
   outputs:
     job_root: work/dynamics/jobs
+
+parameterization:
+  ambertools_root: /home/juan/amber/ambertools25
+  protein_forcefield: ff19SB
+  ligand_forcefield: gaff2
+  charge_method: bcc
+
+  heavy_output_root: /mnt/labio-fast-disk/PocketToDynamics/dynamics/parameterized
+
+receptor_preparation:
+  strip_crystallographic_waters: true
+  water_residue_names:
+    - HOH
+    - WAT
+    - SOL

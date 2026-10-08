@@ -61,6 +61,192 @@ def load_tsv(path: Path):
         )
 
 
+def build_parameterization_ligand(
+    reference_sdf: Path,
+    docked_pdbqt: Path,
+    output_mol2: Path,
+    output_pdb: Path,
+):
+    """
+    Preserve bond orders and chemistry from the original normalized ligand,
+    but transfer the heavy-atom coordinates from the selected docking pose.
+    """
+
+    from rdkit import Chem
+    from rdkit.Chem import AllChem
+
+    mol_ref = Chem.MolFromMolFile(
+        str(reference_sdf),
+        removeHs=False,
+        sanitize=True,
+    )
+
+    if mol_ref is None:
+        raise RuntimeError(
+            f"RDKit could not read reference ligand: {reference_sdf}"
+        )
+
+    # Read selected pose coordinates from PDBQT ATOM/HETATM records.
+    pose_xyz = []
+
+    for line in docked_pdbqt.read_text(
+        errors="replace"
+    ).splitlines():
+
+        if not (
+            line.startswith("ATOM")
+            or
+            line.startswith("HETATM")
+        ):
+            continue
+
+        try:
+            element_token = line[77:79].strip()
+            x = float(line[30:38])
+            y = float(line[38:46])
+            z = float(line[46:54])
+        except Exception:
+            parts = line.split()
+
+            if len(parts) < 8:
+                continue
+
+            x = float(parts[5])
+            y = float(parts[6])
+            z = float(parts[7])
+
+            element_token = parts[-1]
+
+        # Ignore docking hydrogens. We transfer only heavy-atom coordinates.
+        if element_token.upper().startswith("H"):
+            continue
+
+        pose_xyz.append(
+            (x, y, z)
+        )
+
+    ref_heavy = [
+        atom.GetIdx()
+        for atom in mol_ref.GetAtoms()
+        if atom.GetAtomicNum() > 1
+    ]
+
+    if len(ref_heavy) != len(pose_xyz):
+        raise RuntimeError(
+            "Heavy-atom count mismatch: "
+            f"reference={len(ref_heavy)} "
+            f"pose={len(pose_xyz)}"
+        )
+
+    # Add a conformer if necessary.
+    if mol_ref.GetNumConformers() == 0:
+
+        mol_ref = Chem.AddHs(
+            mol_ref
+        )
+
+        AllChem.EmbedMolecule(
+            mol_ref,
+            randomSeed=20261008,
+        )
+
+    conf = mol_ref.GetConformer()
+
+    from rdkit.Geometry import Point3D
+
+    for atom_idx, xyz in zip(
+        ref_heavy,
+        pose_xyz,
+    ):
+
+        conf.SetAtomPosition(
+            atom_idx,
+            Point3D(
+                xyz[0],
+                xyz[1],
+                xyz[2],
+            ),
+        )
+
+    # Rebuild explicit hydrogens around the transferred heavy-atom geometry.
+    mol_noh = Chem.RemoveHs(
+        mol_ref
+    )
+
+    mol_h = Chem.AddHs(
+        mol_noh,
+        addCoords=True,
+    )
+
+    # MOL block is reliable for preserving chemistry; Open Babel will convert.
+    temp_mol = (
+        output_mol2.parent /
+        "ligand_reference_pose.mol"
+    )
+
+    Chem.MolToMolFile(
+        mol_h,
+        str(temp_mol),
+    )
+
+    cmd_mol2 = [
+        str(OBABEL),
+        str(temp_mol),
+        "-O",
+        str(output_mol2),
+    ]
+
+    p_mol2 = subprocess.run(
+        cmd_mol2,
+        capture_output=True,
+        text=True,
+    )
+
+    if (
+        p_mol2.returncode != 0
+        or
+        not output_mol2.exists()
+        or
+        output_mol2.stat().st_size == 0
+    ):
+        raise RuntimeError(
+            "Reference-ligand MOL2 conversion failed: "
+            + p_mol2.stderr
+        )
+
+    cmd_pdb = [
+        str(OBABEL),
+        str(temp_mol),
+        "-O",
+        str(output_pdb),
+    ]
+
+    p_pdb = subprocess.run(
+        cmd_pdb,
+        capture_output=True,
+        text=True,
+    )
+
+    if (
+        p_pdb.returncode != 0
+        or
+        not output_pdb.exists()
+        or
+        output_pdb.stat().st_size == 0
+    ):
+        raise RuntimeError(
+            "Reference-ligand PDB conversion failed: "
+            + p_pdb.stderr
+        )
+
+    return (
+        cmd_mol2,
+        p_mol2,
+        cmd_pdb,
+        p_pdb,
+    )
+
+
 def extract_model(
     source: Path,
     mode: int,
@@ -127,16 +313,39 @@ def run_obabel(
     source: Path,
     output: Path,
     fmt: str,
+    reference_ligand: Path | None = None,
 ):
 
-    command = [
-        str(OBABEL),
-        "-ipdbqt",
-        str(source),
-        f"-o{fmt}",
-        "-O",
-        str(output),
-    ]
+    # For parameterization outputs, preserve chemistry from the
+    # normalized ligand rather than reconstructing it from PDBQT.
+    # PDBQT is used only as the source of the docked heavy-atom pose.
+
+    if (
+        reference_ligand is not None
+        and
+        reference_ligand.exists()
+        and
+        fmt in {"mol2", "pdb"}
+    ):
+
+        command = [
+            str(OBABEL),
+            str(reference_ligand),
+            "-O",
+            str(output),
+            "-h",
+        ]
+
+    else:
+
+        command = [
+            str(OBABEL),
+            "-ipdbqt",
+            str(source),
+            f"-o{fmt}",
+            "-O",
+            str(output),
+        ]
 
     proc = subprocess.run(
         command,
@@ -281,6 +490,12 @@ def main():
             job["ligand_id"]
         )
 
+        reference_ligand = (
+            ROOT /
+            "work/normalized/ligands" /
+            f"{ligand_id}.sdf"
+        )
+
         mode = int(
             job["selected_mode"]
         )
@@ -354,45 +569,17 @@ def main():
                 selected_text
             )
 
-            command_mol2, p_mol2 = (
-                run_obabel(
-                    selected_pdbqt,
-                    selected_mol2,
-                    "mol2",
-                )
+            (
+                command_mol2,
+                p_mol2,
+                command_pdb,
+                p_pdb,
+            ) = build_parameterization_ligand(
+                reference_ligand,
+                selected_pdbqt,
+                selected_mol2,
+                selected_pdb,
             )
-
-            if (
-                p_mol2.returncode != 0
-                or
-                not selected_mol2.exists()
-                or
-                selected_mol2.stat().st_size == 0
-            ):
-                raise RuntimeError(
-                    "OpenBabel MOL2 conversion failed: "
-                    + p_mol2.stderr
-                )
-
-            command_pdb, p_pdb = (
-                run_obabel(
-                    selected_pdbqt,
-                    selected_pdb,
-                    "pdb",
-                )
-            )
-
-            if (
-                p_pdb.returncode != 0
-                or
-                not selected_pdb.exists()
-                or
-                selected_pdb.stat().st_size == 0
-            ):
-                raise RuntimeError(
-                    "OpenBabel PDB conversion failed: "
-                    + p_pdb.stderr
-                )
 
             shutil.copy2(
                 receptor,
