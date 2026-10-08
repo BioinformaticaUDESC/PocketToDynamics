@@ -1,7 +1,9 @@
 # PocketToDynamics: an auditable workflow from pocket-oriented virtual screening to molecular dynamics and empirical energy-landscape analysis
 
-**Technical manuscript draft — 8 October 2026**  
-**Software baseline:** commit `3de57df8a2980207111a8cb71d145eea0aecb382`, before publication-preparation changes.  
+**Technical manuscript draft — 8 October 2026**
+
+**Software baseline:** commit `3de57df8a2980207111a8cb71d145eea0aecb382`, before publication-preparation changes.
+
 **Authors and affiliations:** to be supplied by the contributors.
 
 ## Abstract
