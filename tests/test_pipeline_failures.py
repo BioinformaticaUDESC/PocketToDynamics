@@ -16,6 +16,12 @@ with tempfile.TemporaryDirectory() as dirname:
     try:verified(manifest)
     except ValueError:pass
     else:raise AssertionError('tampered output accepted')
+    artifact.write_text('valid'); source=tmp/'source';source.write_text('old')
+    write_json(manifest,{'status':'PASS','artifact_hashes':{str(artifact):sha256(artifact)},'input_hashes':{str(source):sha256(source)}})
+    source.write_text('changed')
+    try:verified(manifest)
+    except ValueError:pass
+    else:raise AssertionError('stale upstream accepted')
     # Any-mode must never promote NaN/Inf or malformed rank, even if other metrics pass.
     gate=load('09_candidate_gate.py')
     for mode in ['any','all']:

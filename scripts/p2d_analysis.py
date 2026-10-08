@@ -53,6 +53,10 @@ def verified(path):
     if data.get('status')!='PASS': raise ValueError(f'Upstream not PASS: {path}')
     for p,h in data.get('artifact_hashes',{}).items():
         if not Path(p).is_file() or sha256(p)!=h: raise ValueError(f'Artifact hash mismatch: {p}')
+    for p,h in data.get('input_hashes',{}).items():
+        if p==str(ROOT/'config/dynamics.yaml'):
+            continue  # The exact per-stage configuration is an immutable hashed snapshot.
+        if not Path(p).is_file() or sha256(p)!=h: raise ValueError(f'Upstream input hash mismatch: {p}')
     if not data.get('artifact_hashes'): raise ValueError(f'No artifact hashes: {path}')
     return data
 
