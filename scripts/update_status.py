@@ -19,6 +19,7 @@ SPECIAL = {
     "M11_parameterization.log": "M11",
     "M12_minimization.log": "M12",
     "M13_equilibration.log": "M13",
+    "M14_production_md.log": "M14",
 }
 
 

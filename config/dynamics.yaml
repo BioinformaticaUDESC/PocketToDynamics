@@ -94,3 +94,43 @@ equilibration:
   ntomp: 8
 
   heavy_output_root: /mnt/labio-fast-disk/PocketToDynamics/dynamics/equilibrated
+
+production:
+  gmx_executable: /mnt/labio-fast-disk/conda-envs/p2d-md/bin/gmx
+
+  timestep_ps: 0.002
+  total_duration_ps: 100000.0
+  segment_duration_ps: 10000.0
+
+  temperature_k: 300.0
+  pressure_bar: 1.0
+
+  thermostat: V-rescale
+  barostat: C-rescale
+
+  tau_t_ps: 0.1
+  tau_p_ps: 2.0
+  compressibility_bar_inv: 4.5e-5
+
+  constraints: h-bonds
+
+  nstxout_compressed: 5000
+  nstenergy: 1000
+  nstlog: 1000
+  nstcheckpoint: 5000
+
+  ntmpi: 1
+  ntomp: 8
+
+  resume: true
+
+  heavy_output_root: /mnt/labio-fast-disk/PocketToDynamics/dynamics/production
+
+production_fixture:
+  total_duration_ps: 20.0
+  segment_duration_ps: 10.0
+
+  nstxout_compressed: 500
+  nstenergy: 100
+  nstlog: 100
+  nstcheckpoint: 500
