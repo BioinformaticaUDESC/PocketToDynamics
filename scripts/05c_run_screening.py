@@ -101,6 +101,7 @@ def valid_existing_task(
     manifest_path: Path,
     poses_path: Path,
     task_id: str,
+    fingerprint: str,
 ) -> bool:
 
     if not manifest_path.exists():
@@ -122,7 +123,9 @@ def valid_existing_task(
         return False
 
     return (
-        data.get("task_id") == task_id
+        data.get("fingerprint") == fingerprint
+        and data.get("output_sha256") == sha256(poses_path)
+        and data.get("task_id") == task_id
         and
         data.get("status") == "PASS"
         and
@@ -260,6 +263,14 @@ def main():
             "task_manifest.json"
         )
 
+        fingerprint_data = {
+            "job": job, "vina": vina_cfg, "box": box_cfg,
+            "engine_path": str(vina.resolve()), "engine_version": version_text,
+            "engine_sha256": sha256(vina),
+            "receptor_sha256": sha256(receptor), "ligand_sha256": sha256(ligand),
+        }
+        fingerprint = hashlib.sha256(json.dumps(fingerprint_data, sort_keys=True).encode()).hexdigest()
+
         if (
             exec_cfg.get("resume", True)
             and
@@ -272,6 +283,7 @@ def main():
                 manifest_path,
                 poses,
                 task_id,
+                fingerprint,
             )
         ):
 
@@ -292,6 +304,14 @@ def main():
             )
 
             continue
+
+        # Preserve previous attempts and prevent stale poses from passing a failed rerun.
+        old_files = [p for p in [poses, vina_log, stdout_path, stderr_path, manifest_path] if p.exists()]
+        if old_files:
+            archive = task_dir / "history" / str(time.time_ns())
+            archive.mkdir(parents=True)
+            for old in old_files:
+                shutil.move(str(old), str(archive / old.name))
 
         command = [
             str(vina),
@@ -384,6 +404,8 @@ def main():
 
         manifest = {
             "task_id": task_id,
+            "fingerprint": fingerprint,
+            "fingerprint_inputs": fingerprint_data,
 
             "target_id": target_id,
             "pocket_id": job["pocket_id"],

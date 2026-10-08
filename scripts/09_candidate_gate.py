@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import csv
 import json
+import math
+import hashlib
 import sys
 from pathlib import Path
 
@@ -57,12 +59,18 @@ def load_tsv(path: Path):
 
 def as_int(value):
 
-    return int(float(value))
+    v = as_float(value)
+    if not v.is_integer() or v < 1:
+        raise ValueError("Rank must be a positive integer")
+    return int(v)
 
 
 def as_float(value):
 
-    return float(value)
+    v = float(value)
+    if not math.isfinite(v):
+        raise ValueError("Nonfinite candidate metric")
+    return v
 
 
 def main():
@@ -114,58 +122,68 @@ def main():
     evaluated = []
 
     promoted = []
+    invalid_rows = 0
 
     for row in rows:
 
-        checks = {
-            "rank_pass":
-                as_int(
-                    row[
-                        "integrated_rank"
-                    ]
-                )
-                <= int(
-                    criteria[
-                        "max_integrated_rank"
-                    ]
-                ),
-
-            "score_pass":
-                as_float(
-                    row[
-                        "best_score"
-                    ]
-                )
-                <= float(
-                    criteria[
-                        "max_best_score_kcal_mol"
-                    ]
-                ),
-
-            "hit_fraction_pass":
-                as_float(
-                    row[
-                        "hit_fraction"
-                    ]
-                )
-                >= float(
-                    criteria[
-                        "min_hit_fraction"
-                    ]
-                ),
-
-            "ligand_efficiency_pass":
-                as_float(
-                    row[
-                        "docking_ligand_efficiency"
-                    ]
-                )
-                >= float(
-                    criteria[
-                        "min_docking_ligand_efficiency"
-                    ]
-                ),
-        }
+        invalid_data = False
+        try:
+            fraction = as_float(row['hit_fraction'])
+            if not 0 <= fraction <= 1:
+                raise ValueError('hit_fraction outside [0, 1]')
+            checks = {
+                "rank_pass":
+                    as_int(
+                        row[
+                            "integrated_rank"
+                        ]
+                    )
+                    <= int(
+                        criteria[
+                            "max_integrated_rank"
+                        ]
+                    ),
+    
+                "score_pass":
+                    as_float(
+                        row[
+                            "best_score"
+                        ]
+                    )
+                    <= float(
+                        criteria[
+                            "max_best_score_kcal_mol"
+                        ]
+                    ),
+    
+                "hit_fraction_pass":
+                    as_float(
+                        row[
+                            "hit_fraction"
+                        ]
+                    )
+                    >= float(
+                        criteria[
+                            "min_hit_fraction"
+                        ]
+                    ),
+    
+                "ligand_efficiency_pass":
+                    as_float(
+                        row[
+                            "docking_ligand_efficiency"
+                        ]
+                    )
+                    >= float(
+                        criteria[
+                            "min_docking_ligand_efficiency"
+                        ]
+                    ),
+            }
+        except (ValueError, TypeError, KeyError, OverflowError):
+            invalid_data = True
+            invalid_rows += 1
+            checks = dict.fromkeys(['rank_pass', 'score_pass', 'hit_fraction_pass', 'ligand_efficiency_pass'], False)
 
         values = list(
             checks.values()
@@ -183,6 +201,8 @@ def main():
                 values
             )
 
+        gate_pass = gate_pass and not invalid_data
+
         reasons_failed = [
             key.replace(
                 "_pass",
@@ -192,6 +212,9 @@ def main():
             in checks.items()
             if not value
         ]
+
+        if invalid_data:
+            reasons_failed.append("invalid_input")
 
         evaluated_row = {
             "target_id":
@@ -305,6 +328,9 @@ def main():
         )
 
     summary = {
+        "input_sha256": hashlib.sha256(INPUT.read_bytes()).hexdigest(),
+        "config_sha256": hashlib.sha256(CONFIG.read_bytes()).hexdigest(),
+        "invalid_rows": invalid_rows,
         "evaluated":
             len(evaluated),
 
@@ -330,7 +356,10 @@ def main():
         + "\n"
     )
 
-    if not evaluated:
+    if invalid_rows:
+        status = "FAIL_M09_INVALID_CANDIDATE_DATA"
+
+    elif not evaluated:
 
         status = (
             "SKIP_M09_NO_CANDIDATES"
@@ -385,6 +414,8 @@ def main():
         - len(promoted),
     )
 
+    if invalid_rows:
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()
