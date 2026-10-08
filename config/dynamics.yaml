@@ -33,3 +33,32 @@ receptor_preparation:
     - HOH
     - WAT
     - SOL
+
+system_setup:
+  water_model: tip3p
+  water_box: TIP3PBOX
+  box_shape: octahedral
+  buffer_angstrom: 12.0
+
+  neutralize: true
+  positive_ion: Na+
+  negative_ion: Cl-
+
+energy_minimization:
+  integrator: steep
+  emtol_kj_mol_nm: 1000.0
+  emstep_nm: 0.01
+  nsteps: 5000
+
+  cutoff_scheme: Verlet
+  nstlist: 20
+  rlist_nm: 1.0
+  rcoulomb_nm: 1.0
+  rvdw_nm: 1.0
+  coulombtype: PME
+
+  gmx_executable: /mnt/labio-fast-disk/conda-envs/p2d-md/bin/gmx
+  ntmpi: 1
+  ntomp: 8
+
+  heavy_output_root: /mnt/labio-fast-disk/PocketToDynamics/dynamics/minimized
