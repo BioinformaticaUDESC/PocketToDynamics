@@ -1,0 +1,20 @@
+dynamics:
+  engine: gromacs
+
+  promoted_input:
+    file: work/candidates/promoted_candidates.tsv
+
+  source_pose:
+    selection: best_mode
+
+  execution:
+    resume: true
+    overwrite: false
+
+  md:
+    temperature_k: 300
+    pressure_bar: 1.0
+    timestep_ps: 0.002
+
+  outputs:
+    job_root: work/dynamics/jobs
