@@ -1,20 +1,51 @@
-work/
-logs/
+# Runtime inputs, state and computational outputs
+/input/*
+!/input/.gitkeep
+/manifest/*
+!/manifest/.gitkeep
+/work/
+/logs/
+/dynamics/
+/outputs/
+
+# Molecular-dynamics binary outputs and checkpoint data
+*.xtc
+*.trr
+*.tpr
+*.edr
+*.cpt
+*.gro
+*.dcd
+*.nc
+*.rst7
+*.mdcrd
+*.prmtop
+*.parm7
+*.tar.gz
+*.zip
+
+# Local environments and caches (keep config/environment.yml)
+.venv/
+venv/
+envs/
+.conda/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+*.egg-info/
+build/
+dist/
+
+# Credentials, machine-specific settings and temporary files
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials.json
+secrets.*
+/config/*.local.*
 *.tmp
 *.log
-__pycache__/
-*.pyc
-.env
-manifest/*.json
-
-# Runtime manifests / execution state
-manifest/*
-!manifest/.gitkeep
-
-# Runtime user inputs
-input/*
-!input/.gitkeep
-
-# Runtime computational outputs
-work/
-logs/
+.DS_Store
+*~

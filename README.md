@@ -2,7 +2,8 @@
 
 Local molecular screening and dynamics pipeline. Source and lightweight state live in
 `~/PocketToDynamics`; heavy outputs live in `/mnt/labio-fast-disk/PocketToDynamics/dynamics`.
-This repository produces software/QC artifacts, not a manuscript.
+The editable technical manuscript and its evidence map are in `docs/paper/`.
+The manuscript describes software/fixture validation, not demonstrated biological efficacy.
 
 ## Run
 
