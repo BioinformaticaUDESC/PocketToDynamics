@@ -134,3 +134,17 @@ production_fixture:
   nstenergy: 100
   nstlog: 100
   nstcheckpoint: 500
+
+trajectory_preprocessing:
+  gmx_executable: /mnt/labio-fast-disk/conda-envs/p2d-md/bin/gmx
+
+  ligand_resnames:
+    - LIG
+    - UNL
+
+  pbc_nojump: true
+  center_group: Protein_Ligand
+  fit_group: Backbone
+  output_group: System
+
+  heavy_output_root: /mnt/labio-fast-disk/PocketToDynamics/dynamics/preprocessed
