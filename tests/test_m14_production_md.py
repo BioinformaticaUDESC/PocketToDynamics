@@ -144,3 +144,8 @@ print(
     "Final CPT:",
     data["files"]["final_cpt"],
 )
+
+# Exercise fixture checkpoint behavior before downstream analysis consumes the manifest.
+import subprocess
+import sys
+subprocess.run([sys.executable, str(Path(__file__).with_name('test_m14_resume_integration.py'))], check=True)
