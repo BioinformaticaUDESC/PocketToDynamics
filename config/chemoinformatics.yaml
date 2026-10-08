@@ -1,0 +1,20 @@
+chemoinformatics:
+  calculate:
+    molecular_weight: true
+    exact_molecular_weight: true
+    heavy_atoms: true
+    hbond_donors: true
+    hbond_acceptors: true
+    clogp: true
+    tpsa: true
+    rotatable_bonds: true
+    ring_count: true
+    aromatic_ring_count: true
+    fraction_csp3: true
+    formal_charge: true
+
+  derived_metrics:
+    docking_ligand_efficiency: true
+
+  qc:
+    reject_zero_heavy_atoms: true
