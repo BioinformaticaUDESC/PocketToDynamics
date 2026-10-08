@@ -57,6 +57,9 @@ def verified(path):
     return data
 
 def artifact_manifest(out, module, job, inputs, files, details):
+    snapshot=out/'config_snapshot.json'
+    write_json(snapshot,yaml.safe_load((ROOT/'config/dynamics.yaml').read_text()))
+    files=list(files)+[snapshot]
     hashes={str(Path(p).resolve()):sha256(p) for p in files}
     data={'schema_version':1,'module':module,'dynamics_job_id':job,'status':'PASS',
           'input_hashes':{str(Path(p).resolve()):sha256(p) for p in inputs},
@@ -84,8 +87,18 @@ def run_module(module, worker):
     log.write_text(f'FAIL_M{module}_INCOMPLETE\n')
     results=[]; failure=False
     try:
-        if not source.exists(): raise FileNotFoundError(f'Upstream manifest missing: {source}')
-        rows=read_table(source)
+        upstream_skip=False
+        if args.manifest is None:
+            upstream_log=ROOT/'logs'/('M14_production_md'+suffix+'.log' if module==15 else f'M{prev}_{LOGS[prev]}{suffix}.log')
+            if upstream_log.exists():
+                upstream_status=upstream_log.read_text().splitlines()[0]
+                if upstream_status.startswith('FAIL_'): raise ValueError('Upstream module failed')
+                upstream_skip=upstream_status.startswith('SKIP_')
+        if upstream_skip:
+            rows=[]
+        else:
+            if not source.exists(): raise FileNotFoundError(f'Upstream manifest missing: {source}')
+            rows=read_table(source)
         cfg=yaml.safe_load((ROOT/'config/dynamics.yaml').read_text())
         seen=set()
         for row in rows:

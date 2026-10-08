@@ -122,6 +122,8 @@ def valid_existing_task(
     except Exception:
         return False
 
+    if not isinstance(data, dict):
+        return False
     return (
         data.get("fingerprint") == fingerprint
         and data.get("output_sha256") == sha256(poses_path)

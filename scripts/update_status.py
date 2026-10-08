@@ -1,175 +1,24 @@
 #!/usr/bin/env python3
-
+"""Report all expected modules; never silently omit missing logs or mix fixture states."""
 from pathlib import Path
-import re
+import argparse,csv
+from p2d_steps import STEPS,log_name
+ROOT=Path.home()/'PocketToDynamics'
 
+def main():
+    p=argparse.ArgumentParser();p.add_argument('--profile',choices=['production','fixture'],default='production');a=p.parse_args()
+    rows=[]
+    for module,_,filename in STEPS:
+        log=ROOT/'logs'/log_name(module,filename,a.profile)
+        lines=log.read_text(errors='replace').splitlines() if log.exists() else []
+        message=lines[0].strip() if lines else 'MISSING_LOG'
+        status=message.split('_')[0]
+        if status not in {'PASS','SKIP','FAIL','WARN'}: status='UNKNOWN'
+        rows.append({'module':module,'status':status,'message':message,'log_file':str(log.relative_to(ROOT))})
+    out=ROOT/'manifest'/('STATUS_fixture.tsv' if a.profile=='fixture' else 'STATUS.tsv');out.parent.mkdir(exist_ok=True)
+    with out.open('w') as f:
+        w=csv.DictWriter(f,fieldnames=list(rows[0]),delimiter='\t');w.writeheader();w.writerows(rows)
+    for r in rows: print(r['module'],r['status'],r['message'])
+    if any(r['status'] in {'FAIL','UNKNOWN'} for r in rows): raise SystemExit(1)
 
-ROOT = Path.home() / "PocketToDynamics"
-LOG_DIR = ROOT / "logs"
-OUT = ROOT / "manifest" / "STATUS.tsv"
-
-
-SPECIAL = {
-    "M05_engine_preflight.log": "M05A",
-    "M05_prepare_inputs.log": "M05B",
-    "M05C_screening.log": "M05C",
-    "M10A_dynamics_jobs.log": "M10A",
-    "M10B_dynamics_preflight.log": "M10B",
-    "M10C_pose_extraction.log": "M10C",
-    "M11_parameterization.log": "M11",
-    "M12_minimization.log": "M12",
-    "M13_equilibration.log": "M13",
-    "M14_production_md.log": "M14",
-}
-
-
-def module_id(path: Path):
-
-    if path.name in SPECIAL:
-        return SPECIAL[path.name]
-
-    match = re.match(
-        r"(M\d+)",
-        path.name,
-    )
-
-    if match:
-        return match.group(1)
-
-    return None
-
-
-rows = []
-
-for path in sorted(
-    LOG_DIR.glob("M*.log")
-):
-
-    # Integration-test logs must not appear as production modules.
-    if "_fixture" in path.stem or "_test" in path.stem:
-        continue
-
-    text = path.read_text(
-        errors="replace"
-    ).strip()
-
-    if not text:
-        continue
-
-    first = (
-        text.splitlines()[0].strip()
-    )
-
-    module = module_id(path)
-
-    if not module:
-        continue
-
-    if first.startswith("PASS_"):
-        status = "PASS"
-
-    elif first.startswith("WARN_"):
-        status = "WARN"
-
-    elif first.startswith("FAIL_"):
-        status = "FAIL"
-
-    elif first.startswith("SKIP_"):
-        status = "SKIP"
-
-    else:
-        status = "UNKNOWN"
-
-    rows.append(
-        (
-            module,
-            status,
-            first,
-            str(
-                path.relative_to(ROOT)
-            ),
-        )
-    )
-
-
-def sort_key(row):
-
-    module = row[0]
-
-    m = re.match(
-        r"M(\d+)([A-Z]?)$",
-        module,
-    )
-
-    if not m:
-        return (999, "")
-
-    return (
-        int(m.group(1)),
-        m.group(2),
-    )
-
-
-rows.sort(
-    key=sort_key
-)
-
-
-OUT.parent.mkdir(
-    parents=True,
-    exist_ok=True,
-)
-
-
-with OUT.open("w") as f:
-
-    f.write(
-        "module\tstatus\tmessage\tlog_file\n"
-    )
-
-    for row in rows:
-
-        f.write(
-            "\t".join(row)
-            + "\n"
-        )
-
-
-summary = {}
-
-for _, status, _, _ in rows:
-
-    summary[status] = (
-        summary.get(status, 0)
-        + 1
-    )
-
-
-print(
-    "===== PIPELINE STATUS ====="
-)
-
-for (
-    module,
-    status,
-    message,
-    _,
-) in rows:
-
-    print(
-        f"{module:<5} "
-        f"{status:<8} "
-        f"{message}"
-    )
-
-
-print()
-print(
-    "Summary:",
-    summary,
-)
-
-print(
-    "Status file:",
-    OUT,
-)
+if __name__=='__main__':main()

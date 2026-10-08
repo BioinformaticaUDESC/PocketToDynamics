@@ -32,7 +32,7 @@ def worker(row,out,cfg,args):
         for p in (HEAVY/(stage+suffix)/job).rglob('*'): include(p)
     for folder in ['input','work','manifest','logs']:
         for p in (ROOT/folder).rglob('*'):
-            if 'history' not in p.parts: include(p)
+            if 'history' not in p.parts and not p.name.startswith('M21_') and p.name!='STATUS.tsv' and p.name!='STATUS_fixture.tsv': include(p)
     def relative(path):
         if path.is_relative_to(ROOT): return 'repository/'+str(path.relative_to(ROOT))
         if path.is_relative_to(HEAVY): return 'heavy/'+str(path.relative_to(HEAVY))

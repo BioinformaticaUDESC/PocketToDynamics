@@ -171,4 +171,3 @@ pca:
 landscape:
   bins: 30
   fixture_bins: 5
-  max_basins: 5

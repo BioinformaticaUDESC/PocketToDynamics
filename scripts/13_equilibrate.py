@@ -295,9 +295,7 @@ def main():
         )
 
         if job_dir.exists():
-            shutil.rmtree(
-                job_dir
-            )
+            job_dir.rename(job_dir.with_name(job_dir.name + '.previous-' + str(__import__('time').time_ns())))
 
         job_dir.mkdir(
             parents=True,

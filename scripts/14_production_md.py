@@ -203,10 +203,12 @@ def segment_is_complete(
     ):
         return False
 
-    return (
-        data.get("status")
-        == "PASS"
-    )
+    if data.get('status') != 'PASS':
+        return False
+    expected = data.get('sha256', {})
+    return all(expected.get(ext) == sha256(segment_dir / ('md.' + ext))
+               for ext in ['gro', 'cpt', 'edr', 'xtc'])
+
 
 
 def remove_partial_outputs(
@@ -645,6 +647,21 @@ def main():
         job_failed = False
 
         try:
+            provenance = {
+                'config': pcfg, 'profile': args.profile,
+                'inputs': {str(p): sha256(p) for p in required_source},
+                'engine_sha256': sha256(gmx.resolve()),
+            }
+            signature = hashlib.sha256(json.dumps(provenance, sort_keys=True).encode()).hexdigest()
+            provenance_path = job_dir / 'production_inputs.json'
+            if provenance_path.exists():
+                if json.loads(provenance_path.read_text()).get('signature') != signature:
+                    raise RuntimeError('Production inputs/config changed; use a new output root or explicit --overwrite')
+            elif any(job_dir.glob('segment_*/md.cpt')):
+                raise RuntimeError('Legacy checkpoints lack input provenance; use a new output root to revalidate')
+            if sha256(top_copy) != sha256(source_top):
+                raise RuntimeError('Production topology differs from source')
+            provenance_path.write_text(json.dumps({'signature': signature, 'inputs': provenance}, indent=2)+'\n')
 
             for spec in segment_specs:
 
@@ -687,6 +704,10 @@ def main():
                         segment_dir
                     )
                 )
+
+                marker = segment_dir / 'segment_complete.json'
+                if marker.exists() and not complete and not args.overwrite:
+                    raise RuntimeError(f'{seg_name}: completed artifact integrity failed; use a new output root')
 
                 if (
                     complete

@@ -23,7 +23,7 @@ def histogram_basins(counts):
 
 def worker(row,out,cfg,args):
     prior=verified(row['manifest']); pre=preprocessing(prior); pca_path=Path(row['manifest']).parent/'pca.npz'; z=np.load(pca_path)
-    scores=z['scores'][:,:2]; frames=z['frames']; temperature=float(cfg['production']['temperature_k'])
+    scores=z['scores'][:,:2]; frames=z['frames']; temperature=float(json.loads(Path(pre['details']['production_manifest']).read_text())['temperature_k'])
     if not np.isfinite(temperature) or temperature<=0: raise ValueError('Invalid temperature')
     n=int(cfg['landscape']['fixture_bins' if pre['details']['profile']=='fixture' else 'bins'])
     if n<2: raise ValueError('At least two histogram bins required')

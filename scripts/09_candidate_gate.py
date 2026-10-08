@@ -91,6 +91,14 @@ def main():
 
     criteria = gate["criteria"]
 
+    as_int(criteria['max_integrated_rank'])
+    for key, value in criteria.items():
+        as_float(value)
+    if not 0 <= as_float(criteria['min_hit_fraction']) <= 1:
+        raise ValueError('Invalid hit-fraction threshold')
+    if gate.get('output', {}).get('promote_failed_candidates', False):
+        raise ValueError('Promoting failed candidates is unsupported')
+
     mode = (
         gate.get(
             "logic",

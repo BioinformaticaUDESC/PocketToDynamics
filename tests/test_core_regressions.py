@@ -1,8 +1,9 @@
 import importlib.util,sys,json,tempfile
 from pathlib import Path
-sys.path.insert(0,'/home/juan/PocketToDynamics/scripts')
+ROOT=Path.home()/'PocketToDynamics'
+sys.path.insert(0,str(ROOT/'scripts'))
 def module(name):
-    spec=importlib.util.spec_from_file_location('tested','/home/juan/PocketToDynamics/scripts/'+name+'.py');m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m);return m
+    spec=importlib.util.spec_from_file_location('tested',str(ROOT/'scripts'/(name+'.py')));m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m);return m
 m=module('05c_run_screening')
 with tempfile.TemporaryDirectory() as d:
     p=Path(d)/'poses';p.write_text('pose');f=Path(d)/'manifest.json'

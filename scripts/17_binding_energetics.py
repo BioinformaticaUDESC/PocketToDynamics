@@ -8,6 +8,7 @@ import parmed
 
 def worker(row,out,cfg,args):
     prior=verified(row['manifest']); pre=preprocessing(prior); d=pre['details']; ecfg=cfg['energetics']
+    if int(ecfg['igb'])!=5: raise ValueError('This validated MMGBSA implementation requires igb=5 with mbondi2')
     fixture=d['profile']=='fixture'
     root=Path(ecfg['minimized_fixture_root'] if fixture else ecfg['minimized_root'])
     minpath=root/row['dynamics_job_id']/'minimization_manifest.json'
