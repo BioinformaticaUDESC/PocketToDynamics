@@ -1,0 +1,12 @@
+candidate_gate:
+  criteria:
+    max_integrated_rank: 20
+    max_best_score_kcal_mol: -7.0
+    min_hit_fraction: 0.25
+    min_docking_ligand_efficiency: 0.20
+
+  logic:
+    mode: all
+
+  output:
+    promote_failed_candidates: false
