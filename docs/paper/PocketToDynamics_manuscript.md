@@ -4,7 +4,9 @@
 
 **Software baseline:** commit `3de57df8a2980207111a8cb71d145eea0aecb382`, before publication-preparation changes.
 
-**Authors and affiliations:** to be supplied by the contributors.
+**Authors:** Juan Philippe Teixeira¹, Daniel Ferreira de Lima Neto, Miklos Maximiliano Bajay
+
+**Affiliations:** ¹ To be supplied. Affiliations for Daniel Ferreira de Lima Neto and Miklos Maximiliano Bajay remain to be confirmed.
 
 ## Abstract
 
