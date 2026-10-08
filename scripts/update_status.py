@@ -16,6 +16,9 @@ SPECIAL = {
     "M10A_dynamics_jobs.log": "M10A",
     "M10B_dynamics_preflight.log": "M10B",
     "M10C_pose_extraction.log": "M10C",
+    "M11_parameterization.log": "M11",
+    "M12_minimization.log": "M12",
+    "M13_equilibration.log": "M13",
 }
 
 

@@ -78,12 +78,49 @@ for name in required:
 warning_patterns = [
     "LINCS WARNING",
     "constraint warning",
-    "relative constraint deviation",
     "nan occurred",
     "fatal error",
     "segmentation fault",
     "blowing up",
 ]
+
+
+import re
+
+constraint_deviations = []
+
+for filename in [
+    "nvt.log",
+    "npt.log",
+]:
+
+    log_text = (
+        JOB /
+        filename
+    ).read_text(
+        errors="replace"
+    )
+
+    matches = re.findall(
+        r"RMS relative constraint deviation "
+        r"after constraining:\s*"
+        r"([-+0-9.eE]+)",
+        log_text,
+    )
+
+    for value in matches:
+        constraint_deviations.append(
+            float(value)
+        )
+
+assert constraint_deviations, (
+    "No constraint-deviation diagnostics found"
+)
+
+assert max(constraint_deviations) < 1e-3, (
+    "Constraint deviation too large: "
+    f"{max(constraint_deviations)}"
+)
 
 for filename in [
     "nvt.log",
@@ -112,6 +149,11 @@ for filename in [
 
 print(
     "PASS_M13_EQUILIBRATION_QC"
+)
+
+print(
+    "Maximum RMS constraint deviation:",
+    max(constraint_deviations),
 )
 
 print(
