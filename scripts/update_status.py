@@ -13,6 +13,9 @@ SPECIAL = {
     "M05_engine_preflight.log": "M05A",
     "M05_prepare_inputs.log": "M05B",
     "M05C_screening.log": "M05C",
+    "M10A_dynamics_jobs.log": "M10A",
+    "M10B_dynamics_preflight.log": "M10B",
+    "M10C_pose_extraction.log": "M10C",
 }
 
 

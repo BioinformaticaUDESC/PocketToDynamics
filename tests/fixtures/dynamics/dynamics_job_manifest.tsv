@@ -1,0 +1,2 @@
+dynamics_job_id	target_id	ligand_id	pocket_id	screening_task_id	selected_mode	selected_score	source_pose_file	status
+MDTEST_a5b7f2f48479	test_receptor	test_ligand	P0001	TASK_a5b7f2f48479	1	-2.399	work/screening/raw/TASK_a5b7f2f48479/poses.pdbqt	PENDING
