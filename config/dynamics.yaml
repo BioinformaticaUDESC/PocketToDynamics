@@ -148,3 +148,27 @@ trajectory_preprocessing:
   output_group: System
 
   heavy_output_root: /mnt/labio-fast-disk/PocketToDynamics/dynamics/preprocessed
+
+analysis:
+  contact_cutoff_nm: 0.45
+
+energetics:
+  amber_root: /home/juan/amber/ambertools25
+  igb: 5
+  saltcon: 0.15
+  start_frame: 1
+  interval: 10
+  max_frames: 100
+  fixture_interval: 10
+  fixture_max_frames: 3
+  minimized_root: /mnt/labio-fast-disk/PocketToDynamics/dynamics/minimized
+  minimized_fixture_root: /mnt/labio-fast-disk/PocketToDynamics/dynamics/minimized_fixture
+
+pca:
+  stride: 1
+  max_frames: 10000
+
+landscape:
+  bins: 30
+  fixture_bins: 5
+  max_basins: 5
