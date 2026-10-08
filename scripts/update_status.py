@@ -41,6 +41,10 @@ for path in sorted(
     LOG_DIR.glob("M*.log")
 ):
 
+    # Integration-test logs must not appear as production modules.
+    if "_fixture" in path.stem or "_test" in path.stem:
+        continue
+
     text = path.read_text(
         errors="replace"
     ).strip()
