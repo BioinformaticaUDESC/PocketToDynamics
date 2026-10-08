@@ -192,6 +192,7 @@ def segment_is_complete(
         segment_dir / "md.cpt",
         segment_dir / "md.edr",
         segment_dir / "md.log",
+        segment_dir / "md.tpr",
         segment_dir / "md.xtc",
     ]
 
@@ -207,7 +208,7 @@ def segment_is_complete(
         return False
     expected = data.get('sha256', {})
     return all(expected.get(ext) == sha256(segment_dir / ('md.' + ext))
-               for ext in ['gro', 'cpt', 'edr', 'xtc'])
+               for ext in ['gro', 'cpt', 'edr', 'xtc', 'tpr', 'log'])
 
 
 
@@ -1048,6 +1049,8 @@ def main():
                         mode,
 
                     "sha256": {
+                        "tpr": sha256(tpr),
+                        "log": sha256(segment_dir / "md.log"),
                         "gro":
                             sha256(gro),
 

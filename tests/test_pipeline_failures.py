@@ -33,8 +33,8 @@ with tempfile.TemporaryDirectory() as dirname:
     assert missing.returncode==1 and (tmp/'missing.log').read_text().startswith('FAIL_')
     # Segment corruption must not be reported as completed.
     production=load('14_production_md.py');segment=tmp/'segment';segment.mkdir()
-    for ext in ['gro','cpt','edr','xtc','log']:(segment/('md.'+ext)).write_text(ext)
-    write_json(segment/'segment_complete.json',{'status':'PASS','sha256':{ext:sha256(segment/('md.'+ext)) for ext in ['gro','cpt','edr','xtc']}})
+    for ext in ['gro','cpt','edr','xtc','log','tpr']:(segment/('md.'+ext)).write_text(ext)
+    write_json(segment/'segment_complete.json',{'status':'PASS','sha256':{ext:sha256(segment/('md.'+ext)) for ext in ['gro','cpt','edr','xtc','log','tpr']}})
     assert production.segment_is_complete(segment)
     (segment/'md.xtc').write_text('corrupt');assert not production.segment_is_complete(segment)
     # Synthetic trajectory is valid only if every expected time is present.
