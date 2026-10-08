@@ -1,0 +1,16 @@
+ranking:
+  hit_threshold_kcal_mol: -7.0
+
+  metrics:
+    best_score: true
+    mean_score: true
+    median_score: true
+    score_sd: true
+    hit_fraction: true
+    pocket_selectivity_gap: true
+
+  integrated_rank:
+    rank_best_weight: 1.0
+    rank_mean_weight: 1.0
+    rank_hit_fraction_weight: 1.0
+    rank_robustness_weight: 1.0
