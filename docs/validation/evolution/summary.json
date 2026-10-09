@@ -1,0 +1,14 @@
+{
+  "reference": "E. coli K-12 adenylate kinase P69441",
+  "chain": "A",
+  "n_sequences": 405,
+  "alignment_columns": 610,
+  "structure_chain_residues": 214,
+  "mapped_reference_positions": 214,
+  "site_cutoff_angstrom": 5.0,
+  "site_residue_count": 45,
+  "site_mean_conservation": 0.7878264753424459,
+  "noncontact_residue_count": 169,
+  "noncontact_mean_conservation": 0.5168714359972101,
+  "interpretation": "Descriptive, single protein family projection; no phylogenetic model, independence correction, or ligand-affinity claim."
+}

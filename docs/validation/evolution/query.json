@@ -1,0 +1,8 @@
+{
+  "query": "ec:2.7.4.3 AND reviewed:true AND taxonomy_id:2 AND length:[190 TO 230]",
+  "api": "https://rest.uniprot.org/uniprotkb/search",
+  "retrieved_utc": "2026-10-09",
+  "total_records": 588,
+  "unique_sequences": 444,
+  "reference_accession": "P69441"
+}

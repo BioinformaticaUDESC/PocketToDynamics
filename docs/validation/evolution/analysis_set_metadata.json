@@ -1,0 +1,10 @@
+{
+  "uniprot_query": "ec:2.7.4.3 AND reviewed:true AND taxonomy_id:2 AND length:[190 TO 230]",
+  "query_records": 588,
+  "species_in_query": 463,
+  "selected_representatives_before_exact_dedup": 463,
+  "alignment_sequences_after_exact_dedup": 405,
+  "reference": "P69441",
+  "selection": "One reviewed sequence per species, minimizing absolute length difference from the 214 aa reference; exact duplicate sequences removed; deterministic accession tie-break.",
+  "alphabet_filter": "Identity and target coverage filters applied during pairwise reference-guided alignment."
+}

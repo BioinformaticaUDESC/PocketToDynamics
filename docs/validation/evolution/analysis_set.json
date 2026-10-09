@@ -1,0 +1,8 @@
+{
+  "query_records": 588,
+  "species_representatives": 463,
+  "exact_unique_sequences": 405,
+  "reference": "P69441",
+  "selection": "One reviewed entry per species minimizing absolute length difference from reference; accession is the deterministic tie break; exact duplicate sequences removed.",
+  "input_tsv": "/home/juan/PocketToDynamics/work/evolution_adk/uniprot_adenylate_kinases.tsv"
+}
