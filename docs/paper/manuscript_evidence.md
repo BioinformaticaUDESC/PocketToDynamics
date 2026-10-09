@@ -25,6 +25,8 @@ Baseline inspected: `3de57df8a2980207111a8cb71d145eea0aecb382` (8 October 2026).
 | Hash-verified archive and environment/source snapshots | `scripts/21_reproducibility_bundle.py`; `tests/test_analysis_modules.py`; `README.md` |
 | Negative regression cases | `tests/test_core_regressions.py`; `tests/test_pipeline_failures.py`; `tests/test_m14_resume_integration.py` |
 | Dependency specification and installation limits | `config/environment.yml`; `config/dynamics.yaml`; `README.md` |
+| Sequence retrieval, representative selection, reference-guided alignment, entropy and ligand-contact mapping | `scripts/validation/evolution/`; `docs/validation/evolution/README.md`; archived UniProt TSV, FASTA, alignment, results and checksums |
+| Evolutionary conservation figure and reported descriptive means | `docs/paper/figures/evolutionary_conservation.png`; `docs/validation/evolution/summary.json`; `adk_conservation.tsv` |
 
 The sanitized `validation_summary.json` prepared alongside this manuscript summarizes existing audit evidence and fresh read-only QC without distributing heavy trajectories. `docs/PUBLICATION_AUDIT.md` records the publication checks.
 
