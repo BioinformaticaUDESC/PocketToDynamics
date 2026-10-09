@@ -1,0 +1,55 @@
+{
+  "pdb_entry": "8RJ4",
+  "resolution_angstrom": 2.11,
+  "chain": "A",
+  "chain_sequence_length": 214,
+  "sequence_comparison": "Chain A sequence is identical to chain A in 1AKE across all 214 C-alpha positions; RCSB marks the expressed construct engineered.",
+  "ligand": "ADP, CCD component ADP",
+  "ligand_sites": [
+    301,
+    302
+  ],
+  "ligand_formal_charge": -3,
+  "charge_assumption": "One alpha- and two beta-phosphate hydroxyls deprotonated; Mg2+ is omitted from the docking receptor; charge/metal-state effects are not tested.",
+  "starting_conformer": "Independent ETKDGv3 conformer; UFF relaxation; seed 20261010",
+  "receptor_policy": "Chain A protein ATOM records only; all HETATM including ADP, Mg2+, chloride and waters omitted.",
+  "box_policy": "Each site uses its crystallographic ADP heavy-atom bounding box plus 6 A per side, with a 20 A minimum dimension.",
+  "sites": {
+    "301": {
+      "center_angstrom": [
+        24.261000000000003,
+        1.9505,
+        46.3975
+      ],
+      "size_angstrom": [
+        23.12,
+        20.0,
+        20.0
+      ],
+      "reference_heavy_atoms": 27,
+      "uff_returncode": 0
+    },
+    "302": {
+      "center_angstrom": [
+        11.988,
+        -3.116,
+        45.9865
+      ],
+      "size_angstrom": [
+        22.206000000000003,
+        20.0,
+        20.0
+      ],
+      "reference_heavy_atoms": 27,
+      "uff_returncode": 0
+    }
+  },
+  "sources": {
+    "8RJ4.pdb": "https://files.rcsb.org/download/8RJ4.pdb",
+    "ADP.cif": "https://files.rcsb.org/ligands/download/ADP.cif"
+  },
+  "source_sha256": {
+    "8RJ4.pdb": "4d1c9d763c99d84728738b99a0d4a100ea664e72e793f90be559dc360a17939d",
+    "ADP.cif": "fa9eabb464c85c7c5a44146d492b907acd3151a250a4598001cc6abba8da84af"
+  }
+}

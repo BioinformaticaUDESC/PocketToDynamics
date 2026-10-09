@@ -1,0 +1,31 @@
+{
+  "entry": "8RJ4",
+  "chain": "A",
+  "ligand": "ADP",
+  "sites": [
+    301,
+    302
+  ],
+  "seeds": [
+    20261010,
+    20261011,
+    20261012
+  ],
+  "vina_version": "AutoDock Vina v1.2.5",
+  "exhaustiveness": 16,
+  "num_modes": 9,
+  "energy_range_kcal_mol": 4,
+  "cpu_per_run": 2,
+  "box_policy": "Each site uses its crystallographic ADP heavy-atom bounding box plus 6 A per side, with a 20 A minimum dimension.",
+  "site_specific_threshold": "Top pose no-fit symmetry-aware heavy-atom RMSD <= 2.0 A, evaluated per crystallographic reference site.",
+  "input_sha256": {
+    "ligand_302.pdbqt": "d2b1a2567e8d21657bff36b7a521644e854cdf84d92b65dc5ff1b1bb48707342",
+    "receptor.pdbqt": "168c449a36682d32b81101c2fb336baa8576ea0cf15ba2262e3ffd726f47146d",
+    "reference_301.sdf": "a612241bfc5c011c0b24cfaf94f756cd3ece1f17ffc1cef18d18f21943dc7d08",
+    "ligand_302.sdf": "fbd7cd72c4d72cf8f4570f6770373f47c1e126a463631fd9a833c5b552fcb531",
+    "preparation.json": "aa5c4e755602fc5b8fe1f6e87dc13feaaa88c6f527b8158114b95988d2436c35",
+    "reference_302.sdf": "d81cc1cbc6091b40c553a0a86bbfab0a9712a49b8d9965602b6c0405ba93b1bf",
+    "ligand_301.sdf": "8f0d1a7e786f6920359d754675ab32e99f8ff0c873afe256bdf51d16c0c5409c",
+    "ligand_301.pdbqt": "16eba9b016f35643a9009d9085eecbdd270e4cbc68dcf6427f1a81f7385a08ae"
+  }
+}

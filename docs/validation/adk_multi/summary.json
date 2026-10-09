@@ -1,0 +1,74 @@
+[
+  {
+    "site_residue": 301,
+    "seed": 20261010,
+    "n_poses": 9,
+    "top_score_kcal_mol": -10.525,
+    "top_rmsd_angstrom": 0.6215242613184192,
+    "best_rmsd_angstrom": 0.6215242613184192,
+    "best_rmsd_rank": 1,
+    "top_pose_recovered_le_2A": true,
+    "any_pose_recovered_le_2A": true,
+    "runtime_seconds": 70.55525320000015
+  },
+  {
+    "site_residue": 301,
+    "seed": 20261011,
+    "n_poses": 9,
+    "top_score_kcal_mol": -10.529,
+    "top_rmsd_angstrom": 0.6241140980681394,
+    "best_rmsd_angstrom": 0.6241140980681394,
+    "best_rmsd_rank": 1,
+    "top_pose_recovered_le_2A": true,
+    "any_pose_recovered_le_2A": true,
+    "runtime_seconds": 67.36318221300098
+  },
+  {
+    "site_residue": 301,
+    "seed": 20261012,
+    "n_poses": 9,
+    "top_score_kcal_mol": -10.521,
+    "top_rmsd_angstrom": 0.6241746550445636,
+    "best_rmsd_angstrom": 0.6241746550445636,
+    "best_rmsd_rank": 1,
+    "top_pose_recovered_le_2A": true,
+    "any_pose_recovered_le_2A": true,
+    "runtime_seconds": 66.1283884220029
+  },
+  {
+    "site_residue": 302,
+    "seed": 20261010,
+    "n_poses": 9,
+    "top_score_kcal_mol": -11.164,
+    "top_rmsd_angstrom": 0.6276044696864176,
+    "best_rmsd_angstrom": 0.6276044696864176,
+    "best_rmsd_rank": 1,
+    "top_pose_recovered_le_2A": true,
+    "any_pose_recovered_le_2A": true,
+    "runtime_seconds": 63.73513422900214
+  },
+  {
+    "site_residue": 302,
+    "seed": 20261011,
+    "n_poses": 9,
+    "top_score_kcal_mol": -11.139,
+    "top_rmsd_angstrom": 0.6341357489908193,
+    "best_rmsd_angstrom": 0.6341357489908193,
+    "best_rmsd_rank": 1,
+    "top_pose_recovered_le_2A": true,
+    "any_pose_recovered_le_2A": true,
+    "runtime_seconds": 60.18935477699779
+  },
+  {
+    "site_residue": 302,
+    "seed": 20261012,
+    "n_poses": 9,
+    "top_score_kcal_mol": -11.166,
+    "top_rmsd_angstrom": 0.6369587462657559,
+    "best_rmsd_angstrom": 0.6369587462657559,
+    "best_rmsd_rank": 1,
+    "top_pose_recovered_le_2A": true,
+    "any_pose_recovered_le_2A": true,
+    "runtime_seconds": 63.145909080998536
+  }
+]

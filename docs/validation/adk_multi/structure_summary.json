@@ -1,0 +1,35 @@
+{
+  "contacts": [
+    {
+      "complex": "Ap5A 1AKE",
+      "ligand_heavy_atoms": 57,
+      "protein_residues_within_5A": 45,
+      "heavy_atom_pairs_within_5A": 752,
+      "residue_numbers_within_5A": "8,9,10,11,12,13,14,15,31,32,35,36,52,53,56,57,58,59,64,84,85,86,87,88,92,119,120,122,123,124,132,133,134,137,138,156,158,159,167,198,199,200,201,202,205"
+    },
+    {
+      "complex": "ADP 301 8RJ4",
+      "ligand_heavy_atoms": 27,
+      "protein_residues_within_5A": 26,
+      "heavy_atom_pairs_within_5A": 394,
+      "residue_numbers_within_5A": "8,9,10,11,12,13,14,15,16,84,119,120,122,123,124,132,133,134,137,138,198,199,200,201,202,205"
+    },
+    {
+      "complex": "ADP 302 8RJ4",
+      "ligand_heavy_atoms": 27,
+      "protein_residues_within_5A": 28,
+      "heavy_atom_pairs_within_5A": 374,
+      "residue_numbers_within_5A": "8,9,10,13,30,31,32,33,35,36,52,53,56,57,58,59,64,84,85,86,87,88,92,120,123,156,158,167"
+    }
+  ],
+  "structure_comparison": {
+    "n_ca_atoms": 214,
+    "rmsd_4AKE_to_1AKE_angstrom": 7.130677364120547,
+    "median_ca_displacement_4AKE_angstrom": 4.502156811298525,
+    "p95_ca_displacement_4AKE_angstrom": 14.56332539164942,
+    "rmsd_8RJ4_to_1AKE_angstrom": 0.576268355774508,
+    "median_ca_displacement_8RJ4_angstrom": 0.38201505338225994,
+    "p95_ca_displacement_8RJ4_angstrom": 0.947869768678046,
+    "alignment": "Single global Kabsch fit using all 214 matched chain-A C-alpha atoms; per-residue displacements are descriptive."
+  }
+}
