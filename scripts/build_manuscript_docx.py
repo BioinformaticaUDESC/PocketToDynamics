@@ -11,7 +11,7 @@ p=argparse.ArgumentParser();p.add_argument('--source',type=Path,required=True);p
 doc=Document();sec=doc.sections[0];sec.page_width=Inches(8.5);sec.page_height=Inches(11);sec.top_margin=sec.bottom_margin=Inches(.8);sec.left_margin=sec.right_margin=Inches(.85)
 for name in ['Normal','Title','Heading 1','Heading 2','Heading 3','Caption']:
  st=doc.styles[name];st.font.name='Times New Roman';st.font.color.rgb=RGBColor(0,0,0);st.font.size=Pt(11)
- st.paragraph_format.space_after=Pt(6);st.paragraph_format.line_spacing=1.1
+ st.paragraph_format.space_after=Pt(6);st.paragraph_format.line_spacing=1.5
 for name,size in [('Title',18),('Heading 1',14),('Heading 2',12),('Heading 3',11)]:
  st=doc.styles[name];st.font.size=Pt(size);st.font.bold=True;st.paragraph_format.keep_with_next=True;st.paragraph_format.space_before=Pt(10)
 doc.styles['Title'].paragraph_format.space_before=Pt(0)
@@ -23,8 +23,8 @@ for st in doc.styles:
   for attr in list(el.attrib):
    if attr.endswith('Theme'):del el.attrib[attr]
 doc.core_properties.title='PocketToDynamics technical manuscript';doc.core_properties.author='Juan Philippe Teixeira; Daniel Ferreira de Lima Neto; Miklos Maximiliano Bajay'
-# Page numbering aids scientific review without a decorative header.
-pf=sec.footer.paragraphs[0];pf.alignment=WD_ALIGN_PARAGRAPH.CENTER
+# Right-aligned page numbering follows the supplied manuscript model.
+pf=sec.footer.paragraphs[0];pf.alignment=WD_ALIGN_PARAGRAPH.RIGHT
 fld=OxmlElement('w:fldSimple');fld.set(qn('w:instr'),'PAGE');pf._p.append(fld)
 def inline(p,text):
  for token in re.split(r'(\*\*.*?\*\*|\*[^*]+\*|`[^`]+`|\[[^\]]+\]\((?:[^()]|\([^()]*\))+\))',text):
@@ -55,7 +55,7 @@ def table(lines):
    pp=c.paragraphs[0];pp.paragraph_format.space_after=Pt(4);pp.paragraph_format.space_before=Pt(4);inline(pp,txt)
    for r in pp.runs:r.font.size=Pt(9.5);r.bold=i==0
  doc.add_paragraph().paragraph_format.space_after=Pt(0)
-lines=a.source.read_text().splitlines();i=0;pending_image=None;in_references=False
+lines=a.source.read_text().splitlines();i=0;pending_image=None;in_references=False;code_paragraph_ids=set()
 while i<len(lines):
  l=lines[i];i+=1
  if not l.strip():continue
@@ -74,8 +74,8 @@ while i<len(lines):
   while i<len(lines) and not lines[i].startswith('```'):code.append(lines[i]);i+=1
   i+=1
   if lang=='mermaid':continue
-  pp=doc.add_paragraph();pp.paragraph_format.keep_together=True
-  for j,ln in enumerate(code):r=pp.add_run(ln+('\n' if j<len(code)-1 else ''));r.font.name='Consolas';r.font.size=Pt(9)
+  pp=doc.add_paragraph();pp.paragraph_format.keep_together=True;code_paragraph_ids.add(id(pp._p))
+  for j,ln in enumerate(code):r=pp.add_run(ln+('\n' if j<len(code)-1 else ''));r.font.name='Times New Roman';r.font.size=Pt(10)
   continue
  if l=='\\[':
   while i<len(lines) and lines[i]!='\\]':i+=1
@@ -95,6 +95,19 @@ while i<len(lines):
    pp=doc.add_paragraph(heading,style=f'Heading {min(level-1,3)}')
   continue
  pp=doc.add_paragraph();inline(pp,l.strip('*') if l.startswith('*') and l.endswith('*') else l)
-# Prevent a lone heading but permit natural body pagination.
-for pp in doc.paragraphs:pp.paragraph_format.widow_control=True
+# Apply explicit typography so Word themes cannot recolor headings or body text.
+reference_started=False
+for pp in doc.paragraphs:
+ if pp.text.strip()=='References':reference_started=True
+ pp.paragraph_format.widow_control=True
+ if pp.style.name not in {'Title','Heading 1','Heading 2','Heading 3'}:
+  pp.alignment=WD_ALIGN_PARAGRAPH.LEFT if reference_started or id(pp._p) in code_paragraph_ids else WD_ALIGN_PARAGRAPH.JUSTIFY
+ for run in pp.runs:
+  run.font.name='Times New Roman';run.font.color.rgb=RGBColor(0,0,0)
+for table_obj in doc.tables:
+ for row in table_obj.rows:
+  for cell in row.cells:
+   for pp in cell.paragraphs:
+    for run in pp.runs:
+     run.font.name='Times New Roman';run.font.color.rgb=RGBColor(0,0,0)
 a.output.parent.mkdir(parents=True,exist_ok=True);doc.save(a.output);print(a.output)
