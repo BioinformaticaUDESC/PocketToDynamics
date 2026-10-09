@@ -26,6 +26,12 @@ doc.core_properties.title='PocketToDynamics technical manuscript';doc.core_prope
 # Right-aligned page numbering follows the supplied manuscript model.
 pf=sec.footer.paragraphs[0];pf.alignment=WD_ALIGN_PARAGRAPH.RIGHT
 fld=OxmlElement('w:fldSimple');fld.set(qn('w:instr'),'PAGE');pf._p.append(fld)
+# Continuous line numbering in the left margin, matching the supplied model.
+line_numbering=OxmlElement('w:lnNumType')
+line_numbering.set(qn('w:countBy'),'1')
+line_numbering.set(qn('w:restart'),'continuous')
+line_numbering.set(qn('w:distance'),'360')
+sec._sectPr.append(line_numbering)
 def inline(p,text):
  for token in re.split(r'(\*\*.*?\*\*|\*[^*]+\*|`[^`]+`|\[[^\]]+\]\((?:[^()]|\([^()]*\))+\))',text):
   if token.startswith('**') and token.endswith('**'):r=p.add_run(token[2:-2]);r.bold=True
