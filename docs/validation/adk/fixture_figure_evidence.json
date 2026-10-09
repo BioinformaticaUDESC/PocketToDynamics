@@ -1,0 +1,54 @@
+{
+  "n_frames": 21,
+  "duration_ps": 20,
+  "protein_rmsd_range_nm": [
+    0.0,
+    0.13662759065628052
+  ],
+  "ligand_rmsd_range_nm": [
+    0.0,
+    0.22877185344696044
+  ],
+  "protein_rg_range_nm": [
+    2.504037858622184,
+    2.5289693819933805
+  ],
+  "pc1_pc2_variance_fraction": 0.47566903081955286,
+  "occupied_landscape_bins": 10,
+  "evidence": {
+    "analysis": {
+      "manifest_sha256": "8925cbb417c78691231f307ab604185e1131684449c828d43349ab15035d12e8",
+      "artifact_hashes": {
+        "metrics.tsv": "8ea0160740c8c6387fec233835f3b092ba8cb5a77990937d950291805e398631",
+        "rmsf.tsv": "301dd8c5a1d094033c51ef89e618c1d780f88dc2fbbfadcac5eb7e37845da3dd",
+        "sasa.xvg": "34e325d3249bee87001632c2216cd2e8050c774c7446f370094fc99e3798122d",
+        "hbonds.xvg": "7ffb96cc73e655df2decbf9610bddf0a4b9a6d7a9e37590842d815f8ff8fd9af",
+        "metrics.png": "341dd84b618e45f36fb1c519e36b53d56e03a517ed0c89bb2175c4be91de41e5",
+        "config_snapshot.json": "227c1950ba3b144630ef3270116f9fb3d3d0d8833a8bcc4467f75bca73a59c41"
+      }
+    },
+    "pca": {
+      "manifest_sha256": "09708ef5e3341ae160d45059218d4e201304ff1ffbece05fe4f4ff0aa40c186c",
+      "artifact_hashes": {
+        "pca.npz": "062b342432832f10907e6526a03c74dcfd1ceac366ff581141503bdeab70a082",
+        "eigenvalues.tsv": "32fef3d0e6b80fec603226bb4080b560f171bebf897c539a14db2eb28285cac8",
+        "projection.tsv": "92977f15602183267ae0a8727a66df88c255dea9f8bf5de9e8c0611374e09ba9",
+        "pca.png": "274a6e30a151e1c5ae52eecfc6c8fd59ee3ff6e1f3a5ba6647d8635c7ffc6249",
+        "config_snapshot.json": "227c1950ba3b144630ef3270116f9fb3d3d0d8833a8bcc4467f75bca73a59c41"
+      }
+    },
+    "landscape": {
+      "manifest_sha256": "27efda3d0405266b3e05ff96542f0639ca45604d7934547d6260c20e102c8372",
+      "artifact_hashes": {
+        "basins.tsv": "de8c6a16dc273e476eab84110d3bf5f17e4a1fde4f3bb116c4f6eaad3e957ffc",
+        "frame_basins.tsv": "8678fdea18beca346fdb31fb2a3591d35fe05777ea859a967538524386965a8d",
+        "landscape.npz": "cfe2ba7bb6150a137b710a232bcb79aba02ca4bce6e7702da9ffd766888c8c15",
+        "landscape.png": "f00bd76f46b1fcc23fb4412a392027fd16f4201755448745a41366c103499b1d",
+        "basin_001.gro": "f3d0f327ff5c0609860a1d704f5b84de756ea3df6411150c3c6db724a9e6f25e",
+        "basin_002.gro": "6dab7b14f54ba79700cc56f3e834824d93afb98652ddf07ad5e543e7d7844be2",
+        "basin_003.gro": "71b7740bb158f19906d0d65a433719e1d567f13b0800f239e234da9f5313b883",
+        "config_snapshot.json": "227c1950ba3b144630ef3270116f9fb3d3d0d8833a8bcc4467f75bca73a59c41"
+      }
+    }
+  }
+}
