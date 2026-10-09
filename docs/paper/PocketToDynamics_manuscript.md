@@ -1,9 +1,5 @@
 # PocketToDynamics: an auditable workflow from pocket-oriented virtual screening to molecular dynamics and empirical energy-landscape analysis
 
-**Technical manuscript draft — 8 October 2026**
-
-**Software baseline:** commit `3de57df8a2980207111a8cb71d145eea0aecb382`, before publication-preparation changes.
-
 **Authors:** Juan Philippe Teixeira¹, Daniel Ferreira de Lima Neto¹, Miklos Maximiliano Bajay¹
 
 **Affiliations:**
@@ -12,7 +8,7 @@
 
 ## Abstract
 
-PocketToDynamics is a modular computational workflow that connects pocket mapping and virtual screening to molecular dynamics (MD), structural analysis, endpoint energetic estimation, and empirical conformational landscapes. Its principal contribution is an explicit chain of job manifests, quality-control checks, and artifact provenance across otherwise separate computational tools. The implementation contains 25 executable entries spanning M01–M21, including screening preparation and dynamics-entry submodules. A candidate gate separates screening eligibility from downstream execution, while a deliberately selected fixture permits testing MD and analysis without representing a rejected ligand as a promoted scientific candidate. A recorded end-to-end audit using an adenylate-kinase/ethanol fixture reported 24 passing entries and one expected skip; the ordinary production route reported 12 passing entries and 13 skips because no candidate met the gate. The fixture included 20 ps each of NVT and NPT equilibration, 20 ps of segmented production, and 21 trajectory frames. Downstream checks covered structural metrics, three-frame MM/GBSA, principal component analysis, occupancy-derived landscapes, interaction persistence, and a hash-verified reproducibility archive. These observations establish limited software integration and data-consistency evidence, not binding affinity, conformational convergence, or biological activity. The workflow makes computational decisions and limitations inspectable while leaving scientific validation across realistic systems and longer simulations for future work.
+PocketToDynamics is a modular computational workflow that connects pocket mapping and virtual screening to molecular dynamics (MD), structural analysis, endpoint energetic estimation, and empirical conformational landscapes. Its principal contribution is an explicit chain of job manifests, quality-control checks, and artifact provenance across otherwise separate computational tools. The implementation contains 25 executable entries spanning M01–M21, including screening preparation and dynamics-entry submodules. A candidate gate separates screening eligibility from downstream execution, while a deliberately selected fixture permits testing MD and analysis without representing a rejected ligand as a promoted scientific candidate. A recorded end-to-end audit using an adenylate-kinase/ethanol fixture reported 24 passing entries and one expected skip; the ordinary production route reported 12 passing entries and 13 skips because no candidate met the gate. The fixture included 20 ps each of NVT and NPT equilibration, 20 ps of segmented production, and 21 trajectory frames. Downstream checks covered structural metrics, three-frame MM/GBSA, principal component analysis, occupancy-derived landscapes, interaction persistence, and a hash-verified reproducibility archive. A separate known-site Ap5A pilot recovered the crystallographic ligand pose in 1AKE within 2 Å for the top-ranked pose in all three searches (1.48–1.76 Å); the aligned apo comparison gave larger displacements. These observations establish software integration, data consistency and narrowly scoped pose recovery, not binding affinity, conformational convergence or biological activity. The workflow makes computational decisions and limitations inspectable while leaving scientific validation across realistic systems and longer simulations for future work.
 
 **Keywords:** virtual screening; binding pockets; molecular dynamics; reproducibility; provenance; MM/GBSA; principal component analysis.
 
@@ -22,7 +18,7 @@ A structure-based screening workflow involves more than generating docking score
 
 PocketToDynamics addresses these transitions through a sequence of independently inspectable Python modules coordinated by a common runner. It combines pocket-oriented docking with candidate selection, AMBER-based parameterization, GROMACS simulation [4], and trajectory analyses. The implementation emphasizes explicit failure states, artifact checksums, recorded commands, and separation between production eligibility and software fixtures. Docking and endpoint energetics are used as computational descriptors; neither is treated as an experimental affinity measurement.
 
-This manuscript describes the inspected implementation and its recorded fixture validation. It does not report a screening campaign, a discovered ligand, an experimentally validated interaction, or a converged free-energy calculation. Earlier development descriptions ended at M14 with M15 under development. The repository inspected for this manuscript supersedes that milestone: M15–M21 contain executable implementations and recorded fixture checks. Their presence is distinguished below from the substantially broader scientific validation that remains outstanding.
+This manuscript describes the inspected implementation, its recorded fixture validation, and a separate known-site Ap5A docking pilot. It does not report a screening campaign, a discovered ligand, an experimentally validated interaction, or a converged free-energy calculation. Earlier development descriptions ended at M14 with M15 under development. The repository inspected for this manuscript supersedes that milestone: M15–M21 contain executable implementations and recorded fixture checks. Their presence is distinguished below from the substantially broader scientific validation that remains outstanding.
 
 ## 2. Software Architecture and Workflow
 
@@ -43,18 +39,7 @@ The repository separates configuration, inputs, scripts, tests, manifests, logs,
 | M20 | Per-residue contact and hydrogen-bond occupancy | Implemented; matrix/occupancy consistency checks |
 | M21 | Inventory, source/environment snapshots, figures, tables and verified archive | Implemented; archive integrity checks |
 
-```mermaid
-flowchart TD
-    A["M01–M04: inputs, pockets and job matrix"] --> B["M05–M08: docking, ranking and descriptors"]
-    B --> C{"M09: candidate gate"}
-    C -->|Eligible| D["M10: dynamics entry"]
-    C -->|None eligible| E["Downstream production SKIP"]
-    F["Explicit fixture pose"] -.-> D
-    D --> G["M11–M14: parameterization and segmented MD"]
-    G --> H["M15–M16: trajectory QC and structural metrics"]
-    H --> I["M17–M20: energetics, PCA, landscape and contacts"]
-    I --> J["M21: verified reproducibility bundle"]
-```
+![Workflow diagram](figures/workflow.png)
 
 *Figure 1. Logical workflow. The explicit fixture enters at M10C and does not change candidate eligibility. Each stage retains its own checks and provenance.*
 
@@ -122,6 +107,14 @@ M20 calculates per-residue heavy-atom contact occupancy as the fraction of sampl
 
 M21 assembles source snapshots, configuration, inputs, simulation artifacts, environment descriptions, commands, figures, and tables into an archive with an inventory and SHA-256 hashes. Archive members are read back and verified after compression, and a verification script supports checking the extracted bundle. External binaries and complete Conda environments are described rather than embedded. The source Git repository and the heavy reproducibility bundle are separate distribution objects.
 
+### 3.9 Known-site Ap5A docking pilot
+
+A separate pilot used the co-crystallized Ap5A inhibitor (CCD AP5) in 1AKE [7] as a pose reference and the unligated 4AKE structure [8] as an open-state comparison. Chain A was selected from each entry, with blank/A alternative conformers and all receptor heteroatoms removed. The CCD chemical graph was assigned an explicit −5 charge by removing one terminal phosphate hydroxyl proton per phosphorus; this is a modeling assumption, not a validated protonation ensemble. The eight carbon stereocenters were checked against the CCD. An independent ETKDGv3 conformer, generated with seed 20261008 and relaxed using UFF, supplied the docking start instead of the crystal conformation. Meeko 0.8.0 prepared the receptors and ligand.
+
+The 4AKE receptor was aligned to 1AKE using 214 matched chain-A C-alpha atoms. Their global C-alpha RMSD was 7.131 Å; consequently, ligand RMSD for 4AKE is alignment-dependent and descriptive. The common known-site box was centered at (20.8655, 44.5385, 20.4265) Å with dimensions (34.889, 22.777, 20.399) Å, obtained from the crystallographic ligand bounds plus 6 Å per side and a minimum dimension of 20 Å. This pilot tests a known binding site rather than M03 pocket discovery or M09 candidate promotion.
+
+Vina 1.2.5 ran three searches per receptor with seeds 20261007, 20261008 and 20261009, exhaustiveness 8, at most nine returned modes and a 4 kcal/mol energy range. Each search used two CPU threads. The project criterion for 1AKE recovery was a 57-heavy-atom RMSD no greater than 2 Å in the receptor frame, reported both for the top-ranked pose and the closest returned pose. Graph matching preserved carbon stereochemistry and treated terminal phosphate oxygens as resonance-equivalent, enumerating 64 equivalent mappings. No ligand superposition was performed. Metric checks required zero RMSD for identical coordinates and phosphate-oxygen swaps, a retained 10 Å rigid translation, and rejection of an inverted carbon stereocenter. No binary recovery criterion was applied to 4AKE, which lacks an experimental Ap5A pose. Search seeds represent algorithmic repeats, not independent biological or MD replicates.
+
 ## 4. Validation and Testing
 
 Evidence has three levels: source inspection establishes implementation; saved manifests, logs, and artifacts establish recorded execution; regression and numerical checks establish selected invariants. None alone establishes scientific predictive performance. The recorded audit is documented in `docs/AUDIT_2026-10-08.md`, the two status tables, and the production/fixture audit manifests.
@@ -132,7 +125,9 @@ Negative regression checks cover altered hashes, incompatible docking reuse, mal
 
 During publication preparation, the core integrity and pipeline-failure regression suites passed again. Read-only checks of existing M15–M21 artifacts also passed. These checks did not regenerate trajectories or repeat the full computational audit. They therefore provide fresh verification of selected existing artifacts, not a new independent MD replicate or a new end-to-end run.
 
-## 5. Results of Fixture Validation
+## 5. Results of Fixture Validation and the Ap5A Pilot
+
+### 5.1 End-to-end fixture execution
 
 The receptor fixture identifies adenylate kinase as PDB entry 4AKE and contains two 214-residue chains. Ethanol is a small integration-test ligand. Its use does not imply known or predicted specific binding to adenylate kinase.
 
@@ -155,7 +150,40 @@ The receptor fixture identifies adenylate kinase as PDB entry 4AKE and contains 
 
 The rank-20 PCA is consistent with at most N−1 nonzero dimensions for 21 centered observations; it is not evidence of a 20-dimensional physical mechanism. Likewise, three histogram basins in a five-by-five grid describe the particular short sample and binning, not three established molecular states. Zero contacts or hydrogen bonds are permitted observations and are not automatically treated as software errors.
 
+### 5.2 Descriptive fixture figures
+
+Across the existing 21-frame ethanol fixture, protein RMSD ranged from 0 to 0.137 nm and ligand RMSD from 0 to 0.229 nm after the common backbone fit. The protein radius of gyration ranged from 2.504 to 2.529 nm. PC1 and PC2 accounted for 47.57% of the sampled Cartesian variance. Ten of 25 landscape bins were occupied. These are descriptive properties of the short software fixture; they do not establish equilibration, stable binding or an equilibrium landscape.
+
+![Ethanol fixture structural metrics and empirical landscape](figures/fixture_analysis.png)
+
+*Figure 2. Descriptive analysis of the existing 20 ps adenylate-kinase/ethanol software fixture. A, protein and ligand RMSD after a common backbone fit. B, protein radius of gyration. C, C-alpha PCA projection colored by time. D, occupancy-derived relative energy on the configured 5 × 5 grid. White bins are unsampled and have infinite assigned relative energy; they are not interpolated. The same 21 frames underlie all panels. No new MD was performed for this figure.*
+
+### 5.3 Ap5A pose-recovery pilot
+
+All six searches completed and returned nine poses each (54 poses in total). In 1AKE, the top-ranked pose met the project criterion of RMSD ≤2 Å for all three seeds. Top-pose RMSDs were 1.764, 1.482 and 1.762 Å; the closest returned poses had RMSDs of 1.457, 1.482 and 1.720 Å, at ranks 2, 1 and 2, respectively. Top Vina scores ranged from −13.789 to −13.441 kcal/mol. This is a successful known-site redocking result for one ligand under the specified protocol, not an estimate of general docking accuracy.
+
+| Receptor | Seed | Top score (kcal/mol) | Top RMSD (Å) | Best RMSD (Å) | Best-pose rank |
+|---|---|---|---|---|---|
+| 1AKE | 20261007 | -13.441 | 1.764 | 1.457 | 2 |
+| 1AKE | 20261008 | -13.615 | 1.482 | 1.482 | 1 |
+| 1AKE | 20261009 | -13.789 | 1.762 | 1.720 | 2 |
+| 4AKE | 20261007 | -7.658 | 9.626 | 6.324 | 9 |
+| 4AKE | 20261008 | -7.252 | 8.950 | 5.505 | 3 |
+| 4AKE | 20261009 | -8.517 | 5.947 | 5.947 | 1 |
+
+In the aligned 4AKE comparison, top-pose RMSDs relative to the 1AKE ligand were 9.626, 8.950 and 5.947 Å, and the closest returned poses had RMSDs of 6.324, 5.505 and 5.947 Å. Top Vina scores ranged from −8.517 to −7.252 kcal/mol. These larger displacements describe the outputs in the chosen global-alignment frame; they are not proof of absent binding to the open state. The score difference is not a measured affinity difference or conformational free energy. Receptor rigidity, site placement, charge-state assumptions and the large protein conformational difference all limit interpretation. No Ap5A MD, MM/GBSA or energy landscape was generated.
+
+![Ap5A docking scores and pose RMSD for all six searches](figures/docking_summary.png)
+
+*Figure 3. All six Ap5A searches. A, score of the top-ranked Vina pose. B, symmetry-aware RMSD of the top-ranked pose. C, smallest RMSD among the nine returned poses. The dashed 2 Å project criterion applies only to 1AKE redocking. The 4AKE values are descriptive distances to a reference from a different receptor conformation. Seeds are algorithmic repeats; lines are visual guides, and no statistical generalization is inferred from three searches.*
+
+![Fixed-frame projections of Ap5A reference and docked poses](figures/pose_comparison.png)
+
+*Figure 4. XY and XZ projections of the top-ranked poses from the prespecified first seed, 20261007, for 1AKE and globally aligned 4AKE. Black denotes the 1AKE crystallographic ligand, teal the 1AKE docking pose, orange the 4AKE docking pose, and gray the corresponding C-alpha trace. No ligand superposition was applied. Both projections are shown because a single projection can obscure three-dimensional displacement. These views were not selected by the best RMSD across seeds.*
+
 ## 6. Reproducibility
+
+The software baseline inspected for the original workflow audit was commit `3de57df8a2980207111a8cb71d145eea0aecb382`. Subsequent commits record publication preparation and the separate Ap5A pilot.
 
 The repository provides YAML configuration, an environment specification, executable modules, tests, and lightweight audit records. The documented stack includes Python 3.11, GROMACS 2026.3, AmberTools 25/MMPBSA.py 14.0, MDAnalysis 2.10.0, RDKit, NumPy, SciPy, ParmEd, and Matplotlib. Some dependencies are pinned while others are not; the environment file is not a complete immutable lockfile. Recorded runtime versions and the bundle's environment snapshot are therefore important complements.
 
@@ -168,13 +196,13 @@ bash scripts/run_pipeline.sh --profile fixture
 
 The fixture command requires the exact committed test inputs in the expected input directories. It does not replace arbitrary user inputs. Because the production configuration includes long-duration settings, operators must review configuration before launching calculations. The configured home-directory and external-disk paths also require explicit adaptation on another machine. Reproduction in a clean independent environment has not been established by the evidence reported here.
 
-Checksums document identity and detect unintended changes; they do not establish scientific correctness. Resume guards reduce accidental reuse across changed computational conditions, while attempt histories preserve failed runs for inspection. Git stores source, small fixtures and lightweight documentation; heavy trajectories, checkpoints, environments, credentials and local sensitive material are excluded from the publication repository. Reproducing the numerical fixture requires either locally regenerating its heavy artifacts or separately obtaining an appropriate archived bundle.
+Checksums document identity and detect unintended changes; they do not establish scientific correctness. Resume guards reduce accidental reuse across changed computational conditions, while attempt histories preserve failed runs for inspection. Git stores source, small fixtures and lightweight documentation; heavy MD trajectories, checkpoints, environments, credentials and local sensitive material are excluded from the publication repository. Reproducing the numerical fixture requires either locally regenerating its heavy artifacts or separately obtaining an appropriate archived bundle.
 
 ## 7. Limitations
 
-Validation currently centers on one receptor/ligand fixture and short trajectories. There is no demonstrated screening enrichment, pose-recovery benchmark, affinity correlation, comparative performance study, replicate convergence analysis, or experimental validation. The candidate gate prevented a real promoted-candidate production run in the recorded audit. Support for configuration options or alternative engines must not be interpreted as validation of all combinations.
+End-to-end validation currently centers on one receptor/ligand fixture and short trajectories. The additional Ap5A pilot examines one ligand and two conformations of the same protein, at one assumed charge state and one fixed search effort. There is no demonstrated screening enrichment, multi-target pose-recovery benchmark, affinity correlation, comparative performance study, replicate convergence analysis, or new experimental validation. The candidate gate prevented a real promoted-candidate production run in the recorded audit. Support for configuration options or alternative engines must not be interpreted as validation of all combinations.
 
-Preparation choices, protonation states, retained waters, ion composition, force-field/solvent compatibility, and sampling duration require system-specific scientific judgment. The configured TIP3P/ff19SB combination was exercised computationally but has not been compared with alternatives here. Pocket score thresholds, clustering distances, ranking weights and candidate cutoffs are heuristics whose general performance remains unmeasured.
+Preparation choices, protonation states, retained waters, ion composition, force-field/solvent compatibility, and sampling duration require system-specific scientific judgment. The configured TIP3P/ff19SB combination was exercised computationally but has not been compared with alternatives here. The Ap5A pilot uses isolated chain A (214 residues), whereas the ethanol fixture includes both receptor chains (428 residues). The pilot therefore does not test biological-assembly effects or replicate the fixture system. Pocket score thresholds, clustering distances, ranking weights and candidate cutoffs are heuristics whose general performance remains unmeasured.
 
 MM/GBSA omits entropy and uses sparse, potentially correlated frames. The empirical landscape depends strongly on sampling, projection and bin width. PCA does not validate reaction coordinates, and contact frequency does not establish binding stability or residence time. Hydrogen-bond heuristics differ between analysis modules. Runtime paths are partly installation-specific, and the current environment specification does not guarantee portable, bitwise reproduction.
 
@@ -184,15 +212,15 @@ The development repository is [BioinformaticaUDESC/PocketToDynamics](https://git
 
 ## 9. Discussion
 
-The evidence supports PocketToDynamics as a working integration prototype with explicit provenance and fail/skip semantics. Its distinction between a rejected screening candidate and an authorized software fixture is particularly useful: analysis tools can be tested without creating the appearance of scientific candidate success. Hash checks and restart guards also make computational reuse a recorded decision rather than a consequence of file presence.
+The evidence supports PocketToDynamics as a working integration prototype with explicit provenance and fail/skip semantics. The Ap5A redocking pilot adds evidence that the preparation and search tools can recover a crystallographic pose for one challenging, flexible ligand when the site is supplied. Its three successful searches do not estimate an out-of-sample success rate. The apo comparison illustrates sensitivity to receptor conformation and alignment rather than independently validating binding thermodynamics. Its distinction between a rejected screening candidate and an authorized software fixture is particularly useful: analysis tools can be tested without creating the appearance of scientific candidate success. Hash checks and restart guards also make computational reuse a recorded decision rather than a consequence of file presence.
 
-The workflow's breadth should nevertheless be interpreted separately from the depth of validation. Connecting docking, MD, endpoint energetics and PCA does not make their outputs mutually confirming evidence of affinity. Each method introduces assumptions, and downstream processing cannot repair insufficient sampling or unsuitable preparation. The fixture is valuable because it exposes format, topology, frame-selection and packaging errors; it is inadequate for judging biological performance.
+The workflow's breadth should nevertheless be interpreted separately from the depth of validation. Connecting docking, MD, endpoint energetics and PCA does not make their outputs mutually confirming evidence of affinity. Each method introduces assumptions, and downstream processing cannot repair insufficient sampling or unsuitable preparation. The fixture is valuable because it exposes format, topology, frame-selection and packaging errors; it is inadequate for judging biological performance. Likewise, known-site redocking is an easier and narrower problem than prospective pocket discovery and screening against unknown binders.
 
 M01–M14 are implemented, and M15–M21 are also implemented and fixture-checked in the inspected repository. They should therefore not be listed as merely planned modules or described as M15 still being under development. Future work concerns broader validation and engineering hardening: independent clean-environment reproduction, richer molecular fixtures, benchmarking against reference datasets, replicated sampling, uncertainty analysis, sensitivity to landscape binning, and more portable configuration. These are proposed extensions, not completed results or claims that additional numbered modules already exist.
 
 ## 10. Conclusion
 
-PocketToDynamics implements an inspectable computational chain from pocket-oriented screening to MD and empirical landscape analysis. Its recorded fixture demonstrates software interoperability, conditional execution, trajectory and topology consistency, and archive integrity across M01–M21. The corresponding production route appropriately abstained from dynamics when no ligand passed screening criteria. The current evidence supports a technical workflow report and a foundation for broader validation; it does not support claims of ligand efficacy, binding affinity, thermodynamic convergence, or experimentally established molecular mechanisms.
+PocketToDynamics implements an inspectable computational chain from pocket-oriented screening to MD and empirical landscape analysis. Its recorded fixture demonstrates software interoperability, conditional execution, trajectory and topology consistency, and archive integrity across M01–M21. The corresponding production route appropriately abstained from dynamics when no ligand passed screening criteria. The separate Ap5A pilot adds a narrowly scoped test of pose recovery under a known-site protocol; it does not change the production gate or establish affinity. The current evidence supports a technical workflow report and a foundation for broader validation; it does not support claims of ligand efficacy, binding affinity, thermodynamic convergence, or experimentally established molecular mechanisms.
 
 ## References
 
@@ -202,5 +230,8 @@ PocketToDynamics implements an inspectable computational chain from pocket-orien
 4. Abraham MJ, et al. GROMACS: High performance molecular simulations through multi-level parallelism from laptops to supercomputers. *SoftwareX*. 2015. [doi:10.1016/j.softx.2015.06.001](https://doi.org/10.1016/j.softx.2015.06.001).
 5. Michaud-Agrawal N, et al. MDAnalysis: A Toolkit for the Analysis of Molecular Dynamics Simulations. *Journal of Computational Chemistry*. 2011. [doi:10.1002/jcc.21787](https://doi.org/10.1002/jcc.21787).
 6. Capra JA, et al. Predicting Protein Ligand Binding Sites by Combining Evolutionary Sequence Conservation and 3D Structure. *PLOS Computational Biology*. 2009. [doi:10.1371/journal.pcbi.1000585](https://doi.org/10.1371/journal.pcbi.1000585).
+
+7. Müller CW, Schulz GE. Structure of the complex between adenylate kinase from Escherichia coli and the inhibitor Ap5A refined at 1.9 Å resolution. A model for a catalytic transition state. *Journal of Molecular Biology*. 1992;224:159–177. [doi:10.1016/0022-2836(92)90582-5](https://doi.org/10.1016/0022-2836(92)90582-5).
+8. Müller CW, Schlauderer GJ, Reinstein J, Schulz GE. Adenylate kinase motions during catalysis: an energetic counterweight balancing substrate binding. *Structure*. 1996;4:147–156. [doi:10.1016/S0969-2126(96)00018-4](https://doi.org/10.1016/S0969-2126(96)00018-4).
 
 The accompanying `manuscript_evidence.md` maps implementation and validation claims to repository records. Bibliographic coverage should be completed for all third-party methods and software, and author contributions, funding, competing interests and release terms supplied, before journal submission.

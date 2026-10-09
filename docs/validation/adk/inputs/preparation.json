@@ -1,0 +1,65 @@
+{
+  "ligand": "Ap5A / CCD AP5",
+  "heavy_atoms": 57,
+  "formula": "C20H24N10O22P5-5",
+  "formal_charge": -5,
+  "deprotonated_atom_names": [
+    "O2A",
+    "O2B",
+    "O2G",
+    "O2D",
+    "O2E"
+  ],
+  "charge_state_note": "Assumed minus-five phosphate state; no pH titration or metal/protonation ensemble validation",
+  "altloc": "A or blank",
+  "chain": "A",
+  "water_policy": "All HETATM removed from receptors; no waters/ions",
+  "ligand_start": "Independent ETKDGv3 conformation; UFF relaxation, not crystal conformation",
+  "embedding_seed": 20261008,
+  "uff_returncode": 0,
+  "stereo_smiles": "Nc1ncnc2c1ncn2[C@@H]1O[C@H](COP(=O)([O-])OP(=O)([O-])OP(=O)([O-])OP(=O)([O-])OP(=O)([O-])OC[C@H]2O[C@@H](n3cnc4c(N)ncnc43)[C@H](O)[C@@H]2O)[C@@H](O)[C@H]1O",
+  "box_center_angstrom": [
+    20.8655,
+    44.5385,
+    20.4265
+  ],
+  "box_size_angstrom": [
+    34.889,
+    22.777,
+    20.399
+  ],
+  "alignment": "4AKE to 1AKE, all 214 matched chain-A C-alpha atoms, rigid Kabsch; no ligand fit",
+  "alignment_ca_rmsd_angstrom": 7.130700152775838,
+  "rotation": [
+    [
+      -0.14468732330706358,
+      -0.9837948409971674,
+      -0.10589281987743872
+    ],
+    [
+      -0.022293021961270358,
+      0.11023286746120453,
+      -0.9936557432547326
+    ],
+    [
+      0.9892262631198546,
+      -0.1414087188211494,
+      -0.03788105852915812
+    ]
+  ],
+  "translation": [
+    36.6395845632361,
+    42.25829180980683,
+    15.566522656125253
+  ],
+  "raw_sha256": {
+    "AP5.cif": "cb4bed433f1c4ecb298ab99a75879b841a68e1727b170fd7db68043c975a6e58",
+    "4AKE.pdb": "ff798ee8791878eb58bac1c6bed32042f51b455512ac93b50bda8fa0ff0e7f78",
+    "1AKE.pdb": "651e952f55f1317f50f4e82b7f0e99053397032cd8da5b2896f79d0af9f619a9"
+  },
+  "sources": {
+    "1AKE.pdb": "https://files.rcsb.org/download/1AKE.pdb",
+    "4AKE.pdb": "https://files.rcsb.org/download/4AKE.pdb",
+    "AP5.cif": "https://files.rcsb.org/ligands/download/AP5.cif"
+  }
+}

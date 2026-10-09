@@ -49,3 +49,16 @@ These references identify methods; they do not independently validate this workf
 ## Deliberately excluded claims
 
 No efficacy, affinity, enrichment, pose accuracy, experimental validation, equilibrium convergence, kinetics, superior performance, universal reproducibility, or independent replication is claimed. The configured 100 ns production duration is not reported as an executed result. Three fixture histogram basins are not labeled metastable states. The uncorrected MM/GBSA SEM is not treated as convergence evidence. Earlier M15-in-development wording is superseded by inspected implementation and recorded fixture evidence for M15–M21.
+
+## Ap5A pilot and publication figures
+
+A separate six-search known-site pilot generated 54 Ap5A poses. All three 1AKE top-ranked poses met the prespecified 2 Å project criterion. The aligned 4AKE comparison is descriptive and is not evaluated as a crystallographic recovery test. No new MD was performed.
+
+- `docs/validation/adk/RESULTS.md`, `summary.csv`, `poses.csv`: all measured results.
+- `docs/validation/adk/chemistry_qc.json`: eight carbon stereocenters, graph identity and no-fit/symmetry checks.
+- `docs/validation/adk/protocol.json`, `inputs/preparation.json`, `run_records.json`: settings, source hashes, commands and execution history.
+- `docs/validation/adk/inputs/` and `poses/`: small prepared inputs and all output poses; raw MD data remain excluded.
+- `scripts/validation/adk/`: downloadable source snapshots, preparation, docking, graph-aware RMSD and figure generation.
+- `docs/paper/figures/`: four PNG/SVG figures. The ethanol panel was drawn from the already verified 21-frame fixture; its reduced tables and source hashes are in `docs/validation/adk/`.
+
+The pilot was performed separately from the M01–M21 production runner and used known-site information, a larger ligand-envelope box, isolated chain A and an assumed Ap5A charge state of −5. It does not establish pocket-discovery performance, candidate-gate calibration, binding affinity or biological efficacy.

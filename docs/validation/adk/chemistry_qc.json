@@ -1,0 +1,49 @@
+{
+  "carbon_stereocenters": [
+    {
+      "atom": "C4F",
+      "expected_CIP": "R",
+      "observed_CIP": "R"
+    },
+    {
+      "atom": "C3F",
+      "expected_CIP": "S",
+      "observed_CIP": "S"
+    },
+    {
+      "atom": "C2F",
+      "expected_CIP": "R",
+      "observed_CIP": "R"
+    },
+    {
+      "atom": "C1F",
+      "expected_CIP": "R",
+      "observed_CIP": "R"
+    },
+    {
+      "atom": "C4J",
+      "expected_CIP": "R",
+      "observed_CIP": "R"
+    },
+    {
+      "atom": "C3J",
+      "expected_CIP": "S",
+      "observed_CIP": "S"
+    },
+    {
+      "atom": "C2J",
+      "expected_CIP": "R",
+      "observed_CIP": "R"
+    },
+    {
+      "atom": "C1J",
+      "expected_CIP": "R",
+      "observed_CIP": "R"
+    }
+  ],
+  "reference_and_start_matching_graph_equal": true,
+  "heavy_atoms": 57,
+  "formal_charge": -5,
+  "rmsd_self_checks": "Identical=0; rigid 10 angstrom translation=10; terminal phosphate oxygen swaps=0",
+  "phosphate_symmetry": "Charge-separated P(+1)/O(-) representation used only for graph matching; carbon chirality enforced."
+}

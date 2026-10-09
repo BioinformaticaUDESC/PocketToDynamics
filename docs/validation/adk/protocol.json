@@ -1,0 +1,28 @@
+{
+  "receptors": [
+    "1AKE",
+    "4AKE"
+  ],
+  "seeds": [
+    20261007,
+    20261008,
+    20261009
+  ],
+  "exhaustiveness": 8,
+  "num_modes": 9,
+  "energy_range": 4,
+  "cpu_per_run": 2,
+  "parallel_runs": 6,
+  "criterion": "Project criterion: symmetry-aware heavy-atom RMSD <= 2.0 angstrom without ligand superposition; top-ranked and best-returned evaluated separately. For 4AKE RMSD is descriptive only.",
+  "vina_version": "AutoDock Vina v1.2.5",
+  "python": "3.11.17 (main, Oct  7 2026, 00:02:24) [GCC 15.3.0]",
+  "platform": "Linux-6.8.0-142-generic-x86_64-with-glibc2.39",
+  "input_sha256": {
+    "reference.sdf": "c20091000c9ab44d2e1f2eceeadc352da115ad0ee8a87cb58e9d3a267475599f",
+    "4AKE.pdbqt": "e602ac69bff1888ba1b489cb7520e967ac168f10ad144c04ecec4b8203ad3fe8",
+    "preparation.json": "909dafb2da08c4a40651b1bf275a9564bc64423f77399f795aed97a8b00f6149",
+    "1AKE.pdbqt": "cb83af2e0e8dc85b199bbe18f2fe186ed12e29a33c72be0db6ac65462016892a",
+    "ligand.pdbqt": "fed42fe51c188d32ecc0e368e2d56d1b2fa0398e25dc72e7887a61b7b2c14122",
+    "ligand.sdf": "27a4a0a43f481fc24b032fc6789718a860e247ac129bea95a9f8b4bf115b1e8d"
+  }
+}

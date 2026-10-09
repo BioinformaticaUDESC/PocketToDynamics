@@ -10,6 +10,11 @@ import matplotlib.pyplot as plt
 import argparse
 parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--root',type=Path,required=True);args=parser.parse_args();root=args.root.resolve();root.mkdir(parents=True,exist_ok=True);
 out=root/'report';out.mkdir(exist_ok=True)
+protocol=json.loads((root/'protocol.json').read_text())
+for name,digest in protocol['input_sha256'].items():
+ assert hashlib.sha256((root/'prepared'/name).read_bytes()).hexdigest()==digest
+expected={f'{rec}_{seed}' for rec in protocol['receptors'] for seed in protocol['seeds']}
+assert {p.name for p in (root/'docking').iterdir()}==expected
 ref=Chem.SDMolSupplier(str(root/'prepared/reference.sdf'),removeHs=True)[0];assert ref is not None
 self_check(ref)
 rows=[];mols={};summaries=[]
@@ -17,10 +22,12 @@ for dest in sorted((root/'docking').iterdir()):
  run=json.loads((dest/'run.json').read_text());assert run['returncode']==run['export_returncode']==0
  for name,digest in run['sha256'].items():assert hashlib.sha256((dest/name).read_bytes()).hexdigest()==digest
  energies=[float(x) for x in re.findall(r'REMARK VINA RESULT:\s+([-\d.]+)',(dest/'poses.pdbqt').read_text())]
- poses=list(Chem.SDMolSupplier(str(dest/'poses.sdf'),removeHs=True));assert len(poses)==len(energies)>0
+ poses=list(Chem.SDMolSupplier(str(dest/'poses.sdf'),removeHs=True));assert 0<len(poses)==len(energies)<=9
+ assert np.isfinite(energies).all() and all(a<=b for a,b in zip(energies,energies[1:]))
  local=[]
  for rank,(m,e) in enumerate(zip(poses,energies),1):
   assert m is not None and m.GetNumAtoms()==57
+  assert np.isfinite(m.GetConformer().GetPositions()).all()
   # Reject graph/stereo mismatch; symmetry-aware metric never aligns the ligand.
   assert Chem.MolToSmiles(matching_graph(m))==Chem.MolToSmiles(matching_graph(ref)),(dest,rank)
   rms=fixed_frame_rmsd(m,ref)
