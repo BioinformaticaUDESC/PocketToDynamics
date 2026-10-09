@@ -25,7 +25,7 @@ python scripts/validation/adk/dock.py --root work/adk_pilot
 python scripts/validation/adk/analyze.py --root work/adk_pilot
 ```
 
-The source downloader enforces the SHA-256 hashes of the RCSB snapshots used here. If a public structure changes, review the revision explicitly instead of silently accepting new inputs. Preparation refuses to change inputs after a docking directory exists. Docking refuses to overwrite an attempt. Analysis verifies output hashes and chemical graphs before RMSD calculation and checks that a rigidly translated ligand retains its 10 Å displacement (no hidden self-fit).
+The source downloader enforces the SHA-256 hashes of the RCSB snapshots used here. If a public structure changes, review the revision explicitly instead of silently accepting new inputs. Preparation refuses to change inputs after a docking directory exists. Docking refuses to overwrite an attempt. Analysis verifies output hashes and chemical graphs before RMSD calculation. Atom matching preserves carbon stereochemistry and uses 64 resonance-equivalent mappings, including terminal phosphate oxygen exchanges. A charge-separated P(+1)/O(−) representation is used only for matching, never to alter docking inputs. Tests require identical and phosphate-swapped coordinates to give zero RMSD, a rigidly translated ligand to retain its 10 Å displacement, and an inverted carbon stereocenter to be rejected.
 
 The figure for the older ethanol fixture is generated separately:
 

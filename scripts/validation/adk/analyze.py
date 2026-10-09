@@ -3,7 +3,7 @@ from pathlib import Path
 import json,csv,re,copy,hashlib
 import numpy as np
 from rdkit import Chem
-from rdkit.Chem import rdMolAlign
+from rmsd import matching_graph,fixed_frame_rmsd,self_check
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
@@ -11,10 +11,7 @@ import argparse
 parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--root',type=Path,required=True);args=parser.parse_args();root=args.root.resolve();root.mkdir(parents=True,exist_ok=True);
 out=root/'report';out.mkdir(exist_ok=True)
 ref=Chem.SDMolSupplier(str(root/'prepared/reference.sdf'),removeHs=True)[0];assert ref is not None
-assert rdMolAlign.CalcRMS(ref,ref)<1e-8
-shift=Chem.Mol(ref);conf=shift.GetConformer()
-for i,p in enumerate(conf.GetPositions()):conf.SetAtomPosition(i,p+np.array([10,0,0]))
-assert abs(rdMolAlign.CalcRMS(shift,ref)-10)<1e-6, 'RMSD must not fit the ligand'
+self_check(ref)
 rows=[];mols={};summaries=[]
 for dest in sorted((root/'docking').iterdir()):
  run=json.loads((dest/'run.json').read_text());assert run['returncode']==run['export_returncode']==0
@@ -25,16 +22,16 @@ for dest in sorted((root/'docking').iterdir()):
  for rank,(m,e) in enumerate(zip(poses,energies),1):
   assert m is not None and m.GetNumAtoms()==57
   # Reject graph/stereo mismatch; symmetry-aware metric never aligns the ligand.
-  assert Chem.MolToSmiles(m)==Chem.MolToSmiles(ref),(dest,rank,Chem.MolToSmiles(m))
-  rms=rdMolAlign.CalcRMS(m,ref,maxMatches=100000,symmetrizeConjugatedTerminalGroups=True)
+  assert Chem.MolToSmiles(matching_graph(m))==Chem.MolToSmiles(matching_graph(ref)),(dest,rank)
+  rms=fixed_frame_rmsd(m,ref)
   row={'receptor':run['receptor'],'seed':run['seed'],'rank':rank,'vina_score_kcal_mol':e,'symmetry_rmsd_angstrom':rms};rows.append(row);local.append(row);mols[(run['receptor'],run['seed'],rank)]=m
  best=min(local,key=lambda x:x['symmetry_rmsd_angstrom'])
  summaries.append({'receptor':run['receptor'],'seed':run['seed'],'n_poses':len(local),'top_score_kcal_mol':local[0]['vina_score_kcal_mol'],'top_rmsd_angstrom':local[0]['symmetry_rmsd_angstrom'],'best_rmsd_angstrom':best['symmetry_rmsd_angstrom'],'best_rmsd_rank':best['rank'],'top_pose_recovered':local[0]['symmetry_rmsd_angstrom']<=2 if run['receptor']=='1AKE' else None,'any_pose_recovered':best['symmetry_rmsd_angstrom']<=2 if run['receptor']=='1AKE' else None,'runtime_seconds':run['runtime_seconds']})
 for name,records in [('poses.csv',rows),('summary.csv',summaries)]:
  with (out/name).open('w') as f:w=csv.DictWriter(f,fieldnames=list(records[0]));w.writeheader();w.writerows(records)
 (out/'summary.json').write_text(json.dumps(summaries,indent=2)+'\n')
-plt.rcParams.update({'font.size':10,'axes.spines.top':False,'axes.spines.right':False,'svg.fonttype':'none'})
-fig,axes=plt.subplots(1,3,figsize=(13,4),layout='constrained');colors={'1AKE':'#007c91','4AKE':'#b74816'}
+plt.rcParams.update({'font.size':11,'axes.spines.top':False,'axes.spines.right':False,'svg.fonttype':'none'})
+fig,axes=plt.subplots(3,1,figsize=(8.5,8),layout='constrained');colors={'1AKE':'#007c91','4AKE':'#b74816'}
 for rec in ['1AKE','4AKE']:
  v=[s for s in summaries if s['receptor']==rec];x=np.arange(3)+(-.08 if rec=='1AKE' else .08)
  for ax,key in zip(axes,['top_score_kcal_mol','top_rmsd_angstrom','best_rmsd_angstrom']):ax.plot(x,[s[key] for s in v],'o-',label=rec,color=colors[rec],lw=1.2);ax.set_xticks(range(3),['20261007','20261008','20261009'],rotation=30);ax.set_xlabel('Search seed')
