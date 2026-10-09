@@ -46,21 +46,29 @@ def table(lines):
   if i==0:el=OxmlElement('w:tblHeader');trpr.append(el)
   for c,txt,w in zip(cells,row,widths):
    c.width=Inches(w);c.vertical_alignment=WD_CELL_VERTICAL_ALIGNMENT.CENTER;pr=c._tc.get_or_add_tcPr();b=OxmlElement('w:tcBorders')
-   for side in ['top','bottom','left','right']:
-    e=OxmlElement('w:'+side);e.set(qn('w:val'),'single');e.set(qn('w:sz'),'4');e.set(qn('w:color'),'D9D9D9');b.append(e)
+   for side in ['top','bottom']:
+    e=OxmlElement('w:'+side);e.set(qn('w:val'),'single');e.set(qn('w:sz'),'6' if i==0 else '3');e.set(qn('w:color'),'7F7F7F' if i==0 else 'D9D9D9');b.append(e)
+   for side in ['left','right','insideV']:
+    e=OxmlElement('w:'+side);e.set(qn('w:val'),'nil');b.append(e)
    pr.append(b)
    if i==0:sh=OxmlElement('w:shd');sh.set(qn('w:fill'),'E6E6E6');pr.append(sh)
    pp=c.paragraphs[0];pp.paragraph_format.space_after=Pt(4);pp.paragraph_format.space_before=Pt(4);inline(pp,txt)
    for r in pp.runs:r.font.size=Pt(9.5);r.bold=i==0
  doc.add_paragraph().paragraph_format.space_after=Pt(0)
-lines=a.source.read_text().splitlines();i=0;figures=[];pending_image=None
+lines=a.source.read_text().splitlines();i=0;pending_image=None;in_references=False
 while i<len(lines):
  l=lines[i];i+=1
  if not l.strip():continue
  if l.startswith('!['):
   m=re.match(r'!\[([^\]]*)\]\(((?:[^()]|\([^()]*\))+)\)',l);pending_image=(m[1],a.source.parent/m[2]);continue
  if l.startswith('*Figure '):
-  caption=l.strip('*');figures.append((pending_image,caption));pending_image=None;doc.add_paragraph('See '+caption.split('.')[0]+'.',style='Caption');continue
+  caption=l.strip('*')
+  if pending_image is not None:
+   alt,path=pending_image;assert path.exists(),path
+   pp=doc.add_paragraph();pp.paragraph_format.keep_with_next=True;pp.paragraph_format.space_before=Pt(4);pp.paragraph_format.space_after=Pt(2);pp.add_run().add_picture(str(path.resolve()),width=Inches(6.55))
+   for node in pp._p.iter(qn('wp:docPr')):node.set('descr',alt)
+   cp=doc.add_paragraph(caption,style='Caption');cp.paragraph_format.keep_together=True;cp.paragraph_format.space_after=Pt(9)
+  pending_image=None;continue
  if l.startswith('```'):
   lang=l[3:];code=[]
   while i<len(lines) and not lines[i].startswith('```'):code.append(lines[i]);i+=1
@@ -78,16 +86,11 @@ while i<len(lines):
   table(group);continue
  if l.startswith('#'):
   m=re.match(r'(#+) (.*)',l);level=len(m[1]);text=m[2]
+  if text.strip().lower()=='references':in_references=True
   if level==1:pp=doc.add_paragraph(text.replace(':','').replace('-',' '),style='Title')
   else:pp=doc.add_paragraph(re.sub(r'[./:–—-]',' ',text),style=f'Heading {min(level-1,3)}')
   continue
  pp=doc.add_paragraph();inline(pp,l.strip('*') if l.startswith('*') and l.endswith('*') else l)
-for image,caption in figures:
- if image is None:continue
- alt,path=image;assert path.exists(),path
- doc.add_page_break();pp=doc.add_paragraph();pp.paragraph_format.keep_with_next=True;pp.add_run().add_picture(str(path.resolve()),width=Inches(6.8))
- for node in pp._p.iter(qn('wp:docPr')):node.set('descr',alt)
- cp=doc.add_paragraph(caption,style='Caption');cp.paragraph_format.keep_together=True
 # Prevent a lone heading but permit natural body pagination.
 for pp in doc.paragraphs:pp.paragraph_format.widow_control=True
 a.output.parent.mkdir(parents=True,exist_ok=True);doc.save(a.output);print(a.output)
