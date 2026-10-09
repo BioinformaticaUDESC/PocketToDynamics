@@ -88,7 +88,11 @@ while i<len(lines):
   m=re.match(r'(#+) (.*)',l);level=len(m[1]);text=m[2]
   if text.strip().lower()=='references':in_references=True
   if level==1:pp=doc.add_paragraph(text.replace(':','').replace('-',' '),style='Title')
-  else:pp=doc.add_paragraph(re.sub(r'[./:–—-]',' ',text),style=f'Heading {min(level-1,3)}')
+  else:
+   numbered=re.match(r'^(\d+(?:\.\d+)*)\.\s+(.*)$',text)
+   heading=(numbered.group(1)+'  '+numbered.group(2)) if numbered else text
+   heading=re.sub(r'(?<!\d)[/:–—-]|[/:–—-](?!\d)',' ',heading)
+   pp=doc.add_paragraph(heading,style=f'Heading {min(level-1,3)}')
   continue
  pp=doc.add_paragraph();inline(pp,l.strip('*') if l.startswith('*') and l.endswith('*') else l)
 # Prevent a lone heading but permit natural body pagination.
