@@ -2,11 +2,13 @@
 
 **Article type:** Technology and Code
 
-**Authors:** Juan Philippe Teixeira¹, Daniel Ferreira de Lima Neto¹, Miklos Maximiliano Bajay¹
+**Authors:** Juan Philippe Teixeira¹, Daniel Ferreira de Lima Neto¹, Miklos Maximiliano Bajay¹, Rosiléia Marinho de Quadros²
 
 **Affiliations:**
 
 ¹ State University of Santa Catarina – Center for Agricultural and Veterinary Sciences – Graduate Program in Biochemistry and Molecular Biology (PMBqBM)
+
+² State University of Santa Catarina – Center of Agroveterinary Sciences – Department of Veterinary Medicine
 
 ## Abstract
 
@@ -287,10 +289,17 @@ The relationship to existing software is best understood by function rather than
 |---|---|---|
 | Galaxy molecular-simulation protocols [2] | Accessible web-based orchestration and reproducible GROMACS simulation histories | Local Python runner with candidate-gate semantics, module-level status records and explicit restart provenance |
 | Enlighten2 [3] | Containerized protein–ligand MD setup and execution through a GUI | Pocket-screening-to-MD handoff plus trajectory, MM/GBSA, empirical landscape and archive modules |
+| Open-source Galaxy helicase workflows [24] | Automated atomistic MD and analysis, including comparisons with earlier command-line simulations | A target-specific, transparent reference for MD workflow automation; PocketToDynamics additionally defines a candidate gate and a screening-to-MD data handoff |
 | ConCavity [4] | Sequence conservation plus structural geometry for cavity prediction | Used as an upstream component; the evolutionary profile described here is post-hoc and does not rank sites |
 | AutoDock Vina and Meeko [5–6] | Docking engine and molecular input/output preparation | Integrated as components; this work makes no claim of a new docking score or improved pose accuracy |
 
 This comparison is qualitative and based on published scope, not an experimental feature or performance benchmark. The central engineering value lies in keeping provenance and eligibility decisions visible across tools. A candidate gate can prevent an unqualified ligand from flowing automatically into production dynamics, while an explicit fixture can test MD code paths without changing that scientific decision. Checksums and content-aware resume rules reduce ambiguous reuse, and an archive verification stage checks that packaged artifacts remain readable and intact. These properties support auditability, but they cannot ensure that a chosen protonation state, receptor structure, force field or scientific hypothesis is correct.
+
+Recent molecular-dynamics workflow studies illustrate that automation is valuable when it carries scientific inputs and interpretation alongside execution. Galaxy-based helicase workflows, for example, connect preparation, simulation and trajectory processing and compare an automated route with previously reported command-line simulations [24]. That work provides a useful comparator for reproducible MD pipelines, while PocketToDynamics addresses a different boundary: it records whether a screened compound was actually eligible to enter MD, and preserves a controlled test route when screening rejects all candidates. This separation is important because an end-to-end software test should not silently convert a test ligand into a scientific hit. At the same time, the current ADK fixture does not reproduce the breadth of the helicase study: it is one short simulation system and does not establish transferability across targets. The comparison therefore motivates broader clean-install and cross-system studies rather than a claim of superiority.
+
+Reproducibility also has distinct layers that should not be collapsed into a checksum. The FAIR-workflow recommendations emphasize findability, accessibility, interoperability and reuse of workflow descriptions, components and execution context [25]. MoSDeF demonstrates how explicit, standardized molecular models and cross-engine implementations can expose sources of variation in atomistic simulations [26]. PocketToDynamics currently contributes machine-readable manifests, command and environment records, hashes, failure history, and archive verification. Those mechanisms can detect altered or mismatched artifacts and clarify what was run; they do not by themselves guarantee semantic FAIRness, persistent access, independent rerun, or bitwise-identical trajectories. The repository still lacks the public release, reuse license and archival identifier needed to make the software and its data durably accessible. This gap should be resolved before making a strong reproducibility claim, and any future release should preserve exact input structures, parameter files, software versions, random seeds, and license and provenance metadata for both workflow and external data.
+
+The docking pilots should likewise be interpreted against established screening controls. Practical large-scale docking guidance emphasizes careful receptor and ligand preparation, control calculations, compound-library curation, and follow-up evaluation because sampling and scoring approximations can yield plausible-looking poses without reliable hit enrichment [27]. The Ap5A and ADP redockings are useful known-site checks of coordinate conversion, atom mapping and local search; they do not test enrichment, decoy discrimination, blind pocket discovery or prospective activity. The next validation phase should therefore prespecify a diverse, nonredundant complex set, report symmetry-aware pose recovery and failure rates, include negative and inactive controls where available, and separate parameter tuning from held-out evaluation. For nucleotide ligands, retaining metal ions and relevant waters or explicitly evaluating alternative coordination/protonation models is particularly important. These additions would test predictive behavior rather than only software integration.
 
 ### Validation layers and provenance semantics
 
@@ -315,6 +324,10 @@ As a journal format, Technology and Code is the closest description of this soft
 ## Conclusion
 
 PocketToDynamics implements an inspectable computational chain from pocket-oriented screening to MD and empirical landscape analysis. Its recorded fixture demonstrates software interoperability, conditional execution, trajectory and topology consistency, and archive integrity across M01–M21. The corresponding production route appropriately abstained from dynamics when no ligand passed screening criteria. Separate Ap5A and two-site ADP pilots add narrowly scoped pose-recovery evidence under known-site protocols; they do not change the production gate or establish affinity. The current evidence supports a technical workflow report with an evolutionary sequence-to-structure application and a foundation for broader validation; it does not support claims of ligand efficacy, binding affinity, thermodynamic convergence, or experimentally established molecular mechanisms.
+
+## Author Contributions
+
+Rosiléia Marinho de Quadros contributed scientific review of the manuscript and interpretation of the reported results.
 
 ## References
 
@@ -341,3 +354,7 @@ PocketToDynamics implements an inspectable computational chain from pocket-orien
 21. Cock PJA, Antao T, Chang JT, et al. Biopython: freely available Python tools for computational molecular biology and bioinformatics. *Bioinformatics*. 2009;25:1422–1423. [doi:10.1093/bioinformatics/btp163](https://doi.org/10.1093/bioinformatics/btp163).
 22. Müller CW, Schulz GE. Structure of the complex between adenylate kinase from *Escherichia coli* and the inhibitor Ap5A refined at 1.9 Å resolution. A model for a catalytic transition state. *Journal of Molecular Biology*. 1992;224:159–177. [doi:10.1016/0022-2836(92)90582-5](https://doi.org/10.1016/0022-2836(92)90582-5).
 23. Müller CW, Schlauderer GJ, Reinstein J, Schulz GE. Adenylate kinase motions during catalysis: an energetic counterweight balancing substrate binding. *Structure*. 1996;4:147–156. [doi:10.1016/S0969-2126(96)00018-4](https://doi.org/10.1016/S0969-2126(96)00018-4).
+24. Raubenolt P, Blankenberg D. Generalized open-source workflows for atomistic molecular dynamics simulations of viral helicases. *GigaScience*. 2024;13:giae026. [doi:10.1093/gigascience/giae026](https://doi.org/10.1093/gigascience/giae026).
+25. Wilkinson SR, Aloqalaa M, Belhajjame K, et al. Applying the FAIR Principles to computational workflows. *Scientific Data*. 2025;12:328. [doi:10.1038/s41597-025-04451-9](https://doi.org/10.1038/s41597-025-04451-9).
+26. Craven NC, Singh R, Quach CD, et al. Achieving Reproducibility and Replicability of Molecular Dynamics and Monte Carlo Simulations Using the Molecular Simulation Design Framework (MoSDeF). *Journal of Chemical & Engineering Data*. 2025;70:2178–2199. [doi:10.1021/acs.jced.5c00010](https://doi.org/10.1021/acs.jced.5c00010).
+27. Bender BJ, Gahbauer S, Luttens A, et al. A practical guide to large-scale docking. *Nature Protocols*. 2021;16:4799–4832. [doi:10.1038/s41596-021-00597-z](https://doi.org/10.1038/s41596-021-00597-z).

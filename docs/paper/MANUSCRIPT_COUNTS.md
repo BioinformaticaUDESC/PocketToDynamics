@@ -5,6 +5,6 @@ Counts below are calculated from the numbered Word manuscript, using visible par
 | Portion | Words | Characters, including spaces | Characters, excluding whitespace |
 |---|---:|---:|---:|
 | Abstract | 330 | 2,510 | 2,181 |
-| Main text before references | 7,281 | 53,337 | 46,029 |
+| Main text before references | 7,419 | 54,593 | 47,159 |
 
-The manuscript has nine figures and six tables. The numbered version contains ten main sections and numbered subsections. Page numbers are included in the Word footer.
+The manuscript has nine figures, six tables, and 27 references. The 330-word abstract remains below the current 350-word limit; the main text remains below the 12,000-word maximum for Technology and Code. Page numbers are included in the Word footer and continuous line numbering appears in the left margin.

@@ -22,7 +22,7 @@ for st in doc.styles:
  for el in st.element.iter(qn('w:rFonts')):
   for attr in list(el.attrib):
    if attr.endswith('Theme'):del el.attrib[attr]
-doc.core_properties.title='PocketToDynamics technical manuscript';doc.core_properties.author='Juan Philippe Teixeira; Daniel Ferreira de Lima Neto; Miklos Maximiliano Bajay'
+doc.core_properties.title='PocketToDynamics technical manuscript';doc.core_properties.author='Juan Philippe Teixeira; Daniel Ferreira de Lima Neto; Miklos Maximiliano Bajay; Rosiléia Marinho de Quadros'
 # Right-aligned page numbering follows the supplied manuscript model.
 pf=sec.footer.paragraphs[0];pf.alignment=WD_ALIGN_PARAGRAPH.RIGHT
 fld=OxmlElement('w:fldSimple');fld.set(qn('w:instr'),'PAGE');pf._p.append(fld)
