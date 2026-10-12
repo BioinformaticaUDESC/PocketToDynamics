@@ -2,7 +2,7 @@
 
 **Article type:** Technology and Code
 
-**Authors:** Juan Philippe Teixeira¹, Daniel Ferreira de Lima Neto¹, Miklos Maximiliano Bajay¹, Rosiléia Marinho de Quadros²
+**Authors:** Juan Philippe Teixeira¹, Daniel Ferreira de Lima Neto¹, Rosiléia Marinho de Quadros², Miklos Maximiliano Bajay¹
 
 **Affiliations:**
 
